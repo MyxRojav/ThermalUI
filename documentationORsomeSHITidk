@@ -1,4 +1,4 @@
-local CustomUI = loadstring(game:HttpGet("https://your-pastebin-link.com/customui.lua"))()
+local CustomUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/MyxRojav/ThermalUI/refs/heads/main/ThermalUI.lua"))()
 
 local window = CustomUI:CreateWindow({
     LogoID = "rbxassetid://137394765830675"  -- your decal ID
