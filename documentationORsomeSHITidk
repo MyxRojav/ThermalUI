@@ -1,0 +1,30 @@
+local CustomUI = loadstring(game:HttpGet("https://your-pastebin-link.com/customui.lua"))()
+
+local window = CustomUI:CreateWindow({
+    LogoID = "rbxassetid://137394765830675"  -- your decal ID
+})
+
+-- Create tabs
+local mainTab = CustomUI:CreateTab(window, { Name = "Main" })
+local visualsTab = CustomUI:CreateTab(window, { Name = "Visuals" })
+local miscTab = CustomUI:CreateTab(window, { Name = "Misc" })
+
+-- Add elements to left side (side = 1, default)
+CustomUI:CreateSection(mainTab, { Name = "Aimbot" }, 1)
+CustomUI:CreateToggle(mainTab, {
+    Name = "Aimbot",
+    DefaultValue = false,
+    Callback = function(v)
+        if v then _G.Aimbot.Start() else _G.Aimbot.Stop() end
+    end
+}, 1)
+
+-- Add elements to right side (side = 2)
+CustomUI:CreateSection(mainTab, { Name = "ESP" }, 2)
+CustomUI:CreateToggle(mainTab, {
+    Name = "ESP",
+    DefaultValue = false,
+    Callback = function(v)
+        if v then _G.ESP.Start() else _G.ESP.Stop() end
+    end
+}, 2)
