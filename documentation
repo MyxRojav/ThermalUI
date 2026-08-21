@@ -1,12 +1,9 @@
 -- ============================================
--- CUSTOM UI — FULL SHOWCASE
+-- SHOWCASE — Test All UI Elements
 -- ============================================
 
 local CustomUI = loadstring(game:HttpGet("https://pastebin.com/raw/your-custom-ui-code"))()
 
--- ============================================
--- CREATE WINDOW
--- ============================================
 local window = CustomUI:CreateWindow({
     LogoID = "rbxassetid://137394765830675",
     TopText = "MYX Arsenal v2.0 | UI Showcase",
@@ -14,21 +11,15 @@ local window = CustomUI:CreateWindow({
 })
 
 -- ============================================
--- CREATE TABS
+-- TEST TAB
 -- ============================================
-local tab1 = CustomUI:CreateTab(window, { Name = "Main" })
-local tab2 = CustomUI:CreateTab(window, { Name = "Visuals" })
-local tab3 = CustomUI:CreateTab(window, { Name = "Settings" })
-local tab4 = CustomUI:CreateTab(window, { Name = "Misc" })
+local testTab = CustomUI:CreateTab(window, { Name = "Test" })
 
--- ============================================
--- TAB 1 — MAIN (Side 1: Aimbot, Side 2: Triggerbot)
--- ============================================
+-- ===== SECTION 1 (Left Side) =====
+local section1 = CustomUI:CreateSection(testTab, { Name = "Toggles & Buttons" }, 1)
 
--- ===== SIDE 1 =====
-CustomUI:CreateSection(tab1, { Name = "Aimbot Settings" }, 1)
-
-CustomUI:CreateToggle(tab1, {
+-- Toggle
+CustomUI:CreateToggle(testTab, {
     Name = "Toggle 1",
     DefaultValue = false,
     Callback = function(v)
@@ -36,7 +27,7 @@ CustomUI:CreateToggle(tab1, {
     end
 }, 1)
 
-CustomUI:CreateToggle(tab1, {
+CustomUI:CreateToggle(testTab, {
     Name = "Toggle 2",
     DefaultValue = true,
     Callback = function(v)
@@ -44,17 +35,37 @@ CustomUI:CreateToggle(tab1, {
     end
 }, 1)
 
-CustomUI:CreateSlider(tab1, {
+-- Button
+CustomUI:CreateButton(testTab, {
+    Name = "Button 1",
+    Callback = function()
+        print("Button 1 clicked!")
+    end
+}, 1)
+
+CustomUI:CreateButton(testTab, {
+    Name = "Button 2",
+    Callback = function()
+        print("Button 2 clicked!")
+    end
+}, 1)
+
+-- ===== SECTION 2 (Left Side) =====
+local section2 = CustomUI:CreateSection(testTab, { Name = "Sliders & Dropdowns" }, 1)
+
+-- Slider
+CustomUI:CreateSlider(testTab, {
     Name = "Slider 1",
     Min = 0,
     Max = 100,
+    Increment = 1,
     DefaultValue = 50,
     Callback = function(v)
         print("Slider 1:", v)
     end
 }, 1)
 
-CustomUI:CreateSlider(tab1, {
+CustomUI:CreateSlider(testTab, {
     Name = "Slider 2",
     Min = 1,
     Max = 20,
@@ -65,275 +76,119 @@ CustomUI:CreateSlider(tab1, {
     end
 }, 1)
 
-CustomUI:CreateDropdown(tab1, {
+-- Dropdown
+CustomUI:CreateDropdown(testTab, {
     Name = "Dropdown 1",
-    Options = {"Option A", "Option B", "Option C", "Option D"},
+    Options = {"Option A", "Option B", "Option C"},
     DefaultOption = "Option A",
     Callback = function(v)
         print("Dropdown 1:", v)
     end
 }, 1)
 
-CustomUI:CreateButton(tab1, {
-    Name = "Button 1",
+-- ===== SECTION 3 (Right Side) =====
+local section3 = CustomUI:CreateSection(testTab, { Name = "Keybinds & More" }, 2)
+
+-- Keybind
+CustomUI:CreateKeybind(testTab, {
+    Name = "Keybind 1",
+    DefaultKey = "F",
+    Callback = function(v)
+        print("Keybind 1 set to:", v)
+    end
+}, 2)
+
+CustomUI:CreateKeybind(testTab, {
+    Name = "Keybind 2",
+    DefaultKey = "RightControl",
+    Callback = function(v)
+        print("Keybind 2 set to:", v)
+    end
+}, 2)
+
+-- More buttons on right
+CustomUI:CreateButton(testTab, {
+    Name = "Right Button 1",
     Callback = function()
-        print("Button 1 clicked!")
+        print("Right Button 1 clicked!")
+    end
+}, 2)
+
+CustomUI:CreateButton(testTab, {
+    Name = "Right Button 2",
+    Callback = function()
+        print("Right Button 2 clicked!")
+    end
+}, 2)
+
+-- ============================================
+-- SECOND TAB
+-- ============================================
+local secondTab = CustomUI:CreateTab(window, { Name = "Second" })
+
+CustomUI:CreateSection(secondTab, { Name = "More Toggles" }, 1)
+
+CustomUI:CreateToggle(secondTab, {
+    Name = "Toggle A",
+    DefaultValue = false,
+    Callback = function(v)
+        print("Toggle A:", v)
     end
 }, 1)
 
--- ===== SIDE 2 =====
-CustomUI:CreateSection(tab1, { Name = "Triggerbot Settings" }, 2)
-
-CustomUI:CreateToggle(tab1, {
-    Name = "Toggle 3",
+CustomUI:CreateToggle(secondTab, {
+    Name = "Toggle B",
     DefaultValue = false,
     Callback = function(v)
-        print("Toggle 3:", v)
+        print("Toggle B:", v)
     end
-}, 2)
+}, 1)
 
-CustomUI:CreateToggle(tab1, {
-    Name = "Toggle 4",
-    DefaultValue = true,
-    Callback = function(v)
-        print("Toggle 4:", v)
-    end
-}, 2)
-
-CustomUI:CreateSlider(tab1, {
+CustomUI:CreateSlider(secondTab, {
     Name = "Slider 3",
-    Min = 10,
+    Min = 0,
     Max = 500,
     Increment = 5,
-    DefaultValue = 100,
+    DefaultValue = 250,
     Callback = function(v)
         print("Slider 3:", v)
     end
 }, 2)
 
-CustomUI:CreateDropdown(tab1, {
-    Name = "Dropdown 2",
-    Options = {"Option X", "Option Y", "Option Z"},
-    DefaultOption = "Option X",
-    Callback = function(v)
-        print("Dropdown 2:", v)
-    end
-}, 2)
-
-CustomUI:CreateButton(tab1, {
-    Name = "Button 2",
-    Callback = function()
-        print("Button 2 clicked!")
-    end
-}, 2)
-
 -- ============================================
--- TAB 2 — VISUALS (Side 1: ESP, Side 2: Chams)
+-- THIRD TAB
 -- ============================================
+local thirdTab = CustomUI:CreateTab(window, { Name = "Third" })
 
--- ===== SIDE 1 =====
-CustomUI:CreateSection(tab2, { Name = "ESP Settings" }, 1)
+CustomUI:CreateSection(thirdTab, { Name = "Utilities" }, 1)
 
-CustomUI:CreateToggle(tab2, {
-    Name = "Toggle 5",
-    DefaultValue = false,
-    Callback = function(v)
-        print("Toggle 5:", v)
-    end
-}, 1)
-
-CustomUI:CreateToggle(tab2, {
-    Name = "Toggle 6",
-    DefaultValue = true,
-    Callback = function(v)
-        print("Toggle 6:", v)
-    end
-}, 1)
-
-CustomUI:CreateSlider(tab2, {
-    Name = "Slider 4",
-    Min = 50,
-    Max = 500,
-    Increment = 25,
-    DefaultValue = 300,
-    Callback = function(v)
-        print("Slider 4:", v)
-    end
-}, 1)
-
-CustomUI:CreateDropdown(tab2, {
-    Name = "Dropdown 3",
-    Options = {"Box", "Glow", "Chams", "Outline"},
-    DefaultOption = "Glow",
-    Callback = function(v)
-        print("Dropdown 3:", v)
-    end
-}, 1)
-
-CustomUI:CreateButton(tab2, {
-    Name = "Button 3",
+CustomUI:CreateButton(thirdTab, {
+    Name = "Close UI",
     Callback = function()
-        print("Button 3 clicked!")
+        window.ThermalUI:Destroy()
     end
 }, 1)
 
--- ===== SIDE 2 =====
-CustomUI:CreateSection(tab2, { Name = "Chams Settings" }, 2)
-
-CustomUI:CreateToggle(tab2, {
-    Name = "Toggle 7",
-    DefaultValue = false,
-    Callback = function(v)
-        print("Toggle 7:", v)
-    end
-}, 2)
-
-CustomUI:CreateSlider(tab2, {
-    Name = "Slider 5",
-    Min = 0,
-    Max = 100,
-    DefaultValue = 50,
-    Callback = function(v)
-        print("Slider 5:", v)
-    end
-}, 2)
-
-CustomUI:CreateDropdown(tab2, {
-    Name = "Dropdown 4",
-    Options = {"Red", "Blue", "Green", "Yellow", "Purple"},
-    DefaultOption = "Red",
-    Callback = function(v)
-        print("Dropdown 4:", v)
-    end
-}, 2)
-
-CustomUI:CreateButton(tab2, {
-    Name = "Button 4",
+CustomUI:CreateButton(thirdTab, {
+    Name = "Minimize UI",
     Callback = function()
-        print("Button 4 clicked!")
-    end
-}, 2)
-
--- ============================================
--- TAB 3 — SETTINGS (Side 1: Keybinds, Side 2: Config)
--- ============================================
-
--- ===== SIDE 1 =====
-CustomUI:CreateSection(tab3, { Name = "Keybinds" }, 1)
-
-CustomUI:CreateKeybind(tab3, {
-    Name = "UI Keybind",
-    DefaultKey = "RightControl",
-    Callback = function(key)
-        print("UI Keybind set to:", key)
+        window:Toggle()
     end
 }, 1)
 
-CustomUI:CreateKeybind(tab3, {
-    Name = "Aimbot Keybind",
-    DefaultKey = "None",
-    Callback = function(key)
-        print("Aimbot Keybind set to:", key)
+CustomUI:CreateButton(thirdTab, {
+    Name = "Print All Settings",
+    Callback = function()
+        print("=== ALL TOGGLES ===")
+        for _, tab in ipairs(window.Tabs) do
+            print("Tab:", tab.Name)
+            for _, el in ipairs(tab.Elements) do
+                if el.Value ~= nil then
+                    print("  " .. el.Name .. ":", el.Value)
+                end
+            end
+        end
     end
 }, 1)
 
-CustomUI:CreateKeybind(tab3, {
-    Name = "ESP Keybind",
-    DefaultKey = "None",
-    Callback = function(key)
-        print("ESP Keybind set to:", key)
-    end
-}, 1)
-
--- ===== SIDE 2 =====
-CustomUI:CreateSection(tab3, { Name = "Config" }, 2)
-
-CustomUI:CreateButton(tab3, {
-    Name = "Save Config",
-    Callback = function()
-        print("Config saved!")
-    end
-}, 2)
-
-CustomUI:CreateButton(tab3, {
-    Name = "Load Config",
-    Callback = function()
-        print("Config loaded!")
-    end
-}, 2)
-
-CustomUI:CreateButton(tab3, {
-    Name = "Reset Defaults",
-    Callback = function()
-        print("Defaults restored!")
-    end
-}, 2)
-
--- ============================================
--- TAB 4 — MISC (Side 1: Utilities, Side 2: Info)
--- ============================================
-
--- ===== SIDE 1 =====
-CustomUI:CreateSection(tab4, { Name = "Utilities" }, 1)
-
-CustomUI:CreateButton(tab4, {
-    Name = "Anti AFK",
-    Callback = function()
-        print("Anti AFK toggled!")
-    end
-}, 1)
-
-CustomUI:CreateButton(tab4, {
-    Name = "Server Hop",
-    Callback = function()
-        print("Server hopping...")
-    end
-}, 1)
-
-CustomUI:CreateButton(tab4, {
-    Name = "Rejoin",
-    Callback = function()
-        print("Rejoining...")
-    end
-}, 1)
-
-CustomUI:CreateToggle(tab4, {
-    Name = "Toggle 8",
-    DefaultValue = false,
-    Callback = function(v)
-        print("Toggle 8:", v)
-    end
-}, 1)
-
--- ===== SIDE 2 =====
-CustomUI:CreateSection(tab4, { Name = "Info" }, 2)
-
-CustomUI:CreateButton(tab4, {
-    Name = "Print Credits",
-    Callback = function()
-        print("MYX Arsenal v2.0 — Built with CustomUI")
-    end
-}, 2)
-
-CustomUI:CreateButton(tab4, {
-    Name = "Clear Console",
-    Callback = function()
-        print("Console cleared!")
-    end
-}, 2)
-
-CustomUI:CreateSlider(tab4, {
-    Name = "Slider 6",
-    Min = 0,
-    Max = 255,
-    Increment = 1,
-    DefaultValue = 128,
-    Callback = function(v)
-        print("Slider 6:", v)
-    end
-}, 2)
-
--- ============================================
--- NOTIFICATION (optional)
--- ============================================
-print("UI Showcase loaded! Test all elements.")
+print("UI Showcase loaded! Toggle UI with RightControl.")
