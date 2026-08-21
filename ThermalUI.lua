@@ -23,63 +23,32 @@ function CustomUI:CreateWindow(config)
     ThermalUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     ThermalUI.ResetOnSpawn = false
 
-    -- ===== MINIMIZE BOX (TextButton) =====
-    local MinBox = Instance.new("TextButton")
-    MinBox.Name = "MinBox"
-    MinBox.Parent = ThermalUI
-    MinBox.BackgroundColor3 = Color3.fromRGB(31, 31, 31)
-    MinBox.BorderColor3 = Color3.fromRGB(27, 27, 27)
-    MinBox.BorderSizePixel = 0
-    MinBox.Position = UDim2.new(0.313900322, -250, 0.380288512, -225)
-    MinBox.Size = UDim2.new(0, 40, 0, 40)
+-- ===== MINIMIZE BOX (TextButton — clickable) =====
+local MinBox = Instance.new("TextButton")
+MinBox.Name = "MinBox"
+MinBox.Parent = ThermalUI
+MinBox.BackgroundColor3 = Color3.fromRGB(31, 31, 31)
+MinBox.BorderColor3 = Color3.fromRGB(27, 27, 27)
+MinBox.BorderSizePixel = 0
+MinBox.Position = UDim2.new(0.313900322, -250, 0.380288512, -225)
+MinBox.Size = UDim2.new(0, 40, 0, 40)
+MinBox.Visible = false
+MinBox.ClipsDescendants = true
+MinBox.Text = "✦"
+MinBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+MinBox.TextSize = 18
+MinBox.Font = Enum.Font.GothamBold
+
+local MinBoxCorner = Instance.new("UICorner")
+MinBoxCorner.CornerRadius = UDim.new(8, 8)
+MinBoxCorner.Parent = MinBox
+
+-- Click to toggle UI back
+MinBox.MouseButton1Click:Connect(function()
+    CustomUI.Minimized = false
+    MainFrame.Visible = true
     MinBox.Visible = false
-    MinBox.ClipsDescendants = true
-    MinBox.Text = "✦"
-    MinBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    MinBox.TextSize = 18
-    MinBox.Font = Enum.Font.GothamBold
-
-    local MinBoxCorner = Instance.new("UICorner")
-    MinBoxCorner.CornerRadius = UDim.new(8, 8)
-    MinBoxCorner.Parent = MinBox
-
-    -- Minimize Box dragging
-    local minDragging = false
-    local minDragStart = nil
-    local minDragOffset = nil
-
-    MinBox.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            minDragging = true
-            minDragStart = input.Position
-            minDragOffset = MinBox.Position
-        end
-    end)
-
-    game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if minDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local delta = input.Position - minDragStart
-            MinBox.Position = UDim2.new(
-                minDragOffset.X.Scale,
-                minDragOffset.X.Offset + delta.X,
-                minDragOffset.Y.Scale,
-                minDragOffset.Y.Offset + delta.Y
-            )
-        end
-    end)
-
-    game:GetService("UserInputService").InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            minDragging = false
-        end
-    end)
-
-    -- Click to restore UI
-    MinBox.MouseButton1Click:Connect(function()
-        CustomUI.Minimized = false
-        MainFrame.Visible = true
-        MinBox.Visible = false
-    end)
+end)
 
     -- ===== MAIN FRAME =====
     local MainFrame = Instance.new("Frame")
