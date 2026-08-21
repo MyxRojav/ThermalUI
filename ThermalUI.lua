@@ -6,8 +6,6 @@ local CustomUI = {}
 CustomUI.Window = nil
 CustomUI.Tabs = {}
 CustomUI.ActiveTab = nil
-CustomUI.Minimized = false
-CustomUI.MinimizeBox = nil
 CustomUI.UIKeybind = "RightControl"
 
 -- ============================================
@@ -16,6 +14,7 @@ CustomUI.UIKeybind = "RightControl"
 function CustomUI:CreateWindow(config)
     config = config or {}
     local uiKey = config.UIKeybind or "RightControl"
+    local currentUIKey = uiKey  -- MUTABLE live reference
 
     local ThermalUI = Instance.new("ScreenGui")
     ThermalUI.Name = "ThermalUI"
@@ -23,67 +22,64 @@ function CustomUI:CreateWindow(config)
     ThermalUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     ThermalUI.ResetOnSpawn = false
 
--- ===== MINIMIZE BOX (TextButton) =====
-local MinBox = Instance.new("TextButton")
-MinBox.Name = "MinBox"
-MinBox.Parent = ThermalUI
-MinBox.BackgroundColor3 = Color3.fromRGB(31, 31, 31)
-MinBox.BorderColor3 = Color3.fromRGB(27, 27, 27)
-MinBox.BorderSizePixel = 0
-MinBox.Position = UDim2.new(0.313900322, -250, 0.380288512, -225)
-MinBox.Size = UDim2.new(0, 40, 0, 40)
-MinBox.Visible = false
-MinBox.ClipsDescendants = true
-MinBox.Text = "✦"
-MinBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-MinBox.TextSize = 18
-MinBox.Font = Enum.Font.GothamBold
+    -- ===== MINIMIZE BOX (ALWAYS VISIBLE — TOGGLES UI) =====
+    local MinBox = Instance.new("TextButton")
+    MinBox.Name = "MinBox"
+    MinBox.Parent = ThermalUI
+    MinBox.BackgroundColor3 = Color3.fromRGB(31, 31, 31)
+    MinBox.BorderColor3 = Color3.fromRGB(27, 27, 27)
+    MinBox.BorderSizePixel = 0
+    MinBox.Position = UDim2.new(0.313900322, -250, 0.380288512, -225)
+    MinBox.Size = UDim2.new(0, 40, 0, 40)
+    MinBox.Visible = true  -- ALWAYS VISIBLE
+    MinBox.ClipsDescendants = true
+    MinBox.Text = "✦"
+    MinBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    MinBox.TextSize = 18
+    MinBox.Font = Enum.Font.GothamBold
 
-local MinBoxCorner = Instance.new("UICorner")
-MinBoxCorner.CornerRadius = UDim.new(8, 8)
-MinBoxCorner.Parent = MinBox
+    local MinBoxCorner = Instance.new("UICorner")
+    MinBoxCorner.CornerRadius = UDim.new(8, 8)
+    MinBoxCorner.Parent = MinBox
 
--- === DRAGGING (Minimize Box) ===
-local minDragging = false
-local minDragStart = nil
-local minDragOffset = nil
+    -- === DRAGGING (Minimize Box) ===
+    local minDragging = false
+    local minDragStart = nil
+    local minDragOffset = nil
 
-MinBox.MouseButton1Down:Connect(function()
-    minDragging = true
-    minDragStart = game:GetService("UserInputService"):GetMouseLocation()
-    minDragOffset = MinBox.Position
-end)
+    MinBox.MouseButton1Down:Connect(function()
+        minDragging = true
+        minDragStart = game:GetService("UserInputService"):GetMouseLocation()
+        minDragOffset = MinBox.Position
+    end)
 
-game:GetService("UserInputService").InputChanged:Connect(function(input)
-    if minDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local currentPos = game:GetService("UserInputService"):GetMouseLocation()
-        local delta = currentPos - minDragStart
-        MinBox.Position = UDim2.new(
-            minDragOffset.X.Scale,
-            minDragOffset.X.Offset + delta.X,
-            minDragOffset.Y.Scale,
-            minDragOffset.Y.Offset + delta.Y
-        )
-    end
-end)
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if minDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local currentPos = game:GetService("UserInputService"):GetMouseLocation()
+            local delta = currentPos - minDragStart
+            MinBox.Position = UDim2.new(
+                minDragOffset.X.Scale,
+                minDragOffset.X.Offset + delta.X,
+                minDragOffset.Y.Scale,
+                minDragOffset.Y.Offset + delta.Y
+            )
+        end
+    end)
 
-game:GetService("UserInputService").InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        minDragging = false
-    end
-end)
+    game:GetService("UserInputService").InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            minDragging = false
+        end
+    end)
 
--- === CLICK TO RESTORE (only if not dragging) ===
-local minClickTime = 0
-MinBox.MouseButton1Click:Connect(function()
-    -- Only restore if it was a click, not a drag
-    if tick() - minClickTime > 0.1 then
-        CustomUI.Minimized = false
-        MainFrame.Visible = true
-        MinBox.Visible = false
-    end
-    minClickTime = tick()
-end)
+    -- === CLICK TO TOGGLE UI ===
+    MinBox.MouseButton1Click:Connect(function()
+        if MainFrame.Visible then
+            MainFrame.Visible = false
+        else
+            MainFrame.Visible = true
+        end
+    end)
 
     -- ===== MAIN FRAME =====
     local MainFrame = Instance.new("Frame")
@@ -118,7 +114,7 @@ end)
     TopText.TextXAlignment = Enum.TextXAlignment.Left
     TopText.Font = Enum.Font.GothamMedium
 
-    -- ===== MINIMIZE BUTTON =====
+    -- ===== MINIMIZE BUTTON (hides UI, shows MinBox) =====
     local MinButton = Instance.new("TextButton")
     MinButton.Name = "MinButton"
     MinButton.Parent = Topbar
@@ -137,10 +133,7 @@ end)
     MinButtonCorner.Parent = MinButton
 
     MinButton.MouseButton1Click:Connect(function()
-        CustomUI.Minimized = true
         MainFrame.Visible = false
-        MinBox.Visible = true
-        MinBox.Position = MainFrame.Position
     end)
 
     -- ===== CLOSE BUTTON =====
@@ -215,7 +208,7 @@ end)
     ContentContainer2.Size = UDim2.new(0, 294, 0, 545)
     ContentContainer2.ClipsDescendants = true
 
-    -- ===== DRAGGING =====
+    -- ===== DRAGGING (Main Frame) =====
     local dragging = false
     local dragStart = nil
     local dragOffset = nil
@@ -246,21 +239,11 @@ end)
         end
     end)
 
-    -- ===== UI KEYBIND =====
-    local uiKeybindEnabled = true
+    -- ===== UI KEYBIND (LIVE REFERENCE) =====
     game:GetService("UserInputService").InputBegan:Connect(function(input, GPE)
         if GPE then return end
-        if input.KeyCode == Enum.KeyCode[uiKey] and input.UserInputType == Enum.UserInputType.Keyboard then
-            if MainFrame.Visible then
-                CustomUI.Minimized = true
-                MainFrame.Visible = false
-                MinBox.Visible = true
-                MinBox.Position = MainFrame.Position
-            else
-                CustomUI.Minimized = false
-                MainFrame.Visible = true
-                MinBox.Visible = false
-            end
+        if input.KeyCode == Enum.KeyCode[currentUIKey] and input.UserInputType == Enum.UserInputType.Keyboard then
+            MainFrame.Visible = not MainFrame.Visible
         end
     end)
 
@@ -279,21 +262,12 @@ end)
         Logo = Logo,
         Tabs = {},
         ActiveTab = nil,
-        UIKeybind = uiKey,
+        UIKeybind = currentUIKey,
         Toggle = function()
-            if MainFrame.Visible then
-                CustomUI.Minimized = true
-                MainFrame.Visible = false
-                MinBox.Visible = true
-                MinBox.Position = MainFrame.Position
-            else
-                CustomUI.Minimized = false
-                MainFrame.Visible = true
-                MinBox.Visible = false
-            end
+            MainFrame.Visible = not MainFrame.Visible
         end,
         SetKeybind = function(key)
-            uiKey = key
+            currentUIKey = key
             self.Window.UIKeybind = key
         end
     }
@@ -312,7 +286,6 @@ function CustomUI:CreateTab(window, config)
     tab.Name = tabName
     tab.Elements = {}
 
-    -- Tab button
     local btn = Instance.new("TextButton")
     btn.Name = tabName .. "Btn"
     btn.Size = UDim2.new(1, -20, 0, 35)
@@ -336,7 +309,6 @@ function CustomUI:CreateTab(window, config)
         end
     end)
 
-    -- Active indicator (left side)
     local indicator = Instance.new("Frame")
     indicator.Name = "Indicator"
     indicator.Size = UDim2.new(0, 3, 0, 25)
@@ -346,7 +318,6 @@ function CustomUI:CreateTab(window, config)
     indicator.Visible = false
     indicator.Parent = btn
 
-    -- Tab pages
     local page1 = Instance.new("ScrollingFrame")
     page1.Name = tabName .. "_Page1"
     page1.Size = UDim2.new(1, 0, 1, 0)
@@ -367,7 +338,6 @@ function CustomUI:CreateTab(window, config)
     page2.Visible = false
     page2.Parent = window.Content2
 
-    -- Layouts
     local layout1 = Instance.new("UIListLayout")
     layout1.FillDirection = Enum.FillDirection.Vertical
     layout1.SortOrder = Enum.SortOrder.LayoutOrder
@@ -557,7 +527,7 @@ function CustomUI:CreateToggle(tab, config, side)
 end
 
 -- ============================================
--- CREATE SLIDER
+-- CREATE SLIDER (FIXED — full frame hitbox)
 -- ============================================
 function CustomUI:CreateSlider(tab, config, side)
     side = side or 1
@@ -642,38 +612,38 @@ function CustomUI:CreateSlider(tab, config, side)
     end
 
     local dragging = false
-local function startDrag(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        local pos = input.Position.X - track.AbsolutePosition.X
-        local percent = math.clamp(pos / track.AbsoluteSize.X, 0, 1)
-        updateSlider(min + (max - min) * percent)
+    local function startDrag(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            local pos = input.Position.X - track.AbsolutePosition.X
+            local percent = math.clamp(pos / track.AbsoluteSize.X, 0, 1)
+            updateSlider(min + (max - min) * percent)
+        end
     end
-end
 
-local function moveDrag(input)
-    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local pos = input.Position.X - track.AbsolutePosition.X
-        local percent = math.clamp(pos / track.AbsoluteSize.X, 0, 1)
-        updateSlider(min + (max - min) * percent)
+    local function moveDrag(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local pos = input.Position.X - track.AbsolutePosition.X
+            local percent = math.clamp(pos / track.AbsoluteSize.X, 0, 1)
+            updateSlider(min + (max - min) * percent)
+        end
     end
-end
 
-local function endDrag(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
+    local function endDrag(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
     end
-end
 
--- Attach to the ENTIRE slider frame, not just the track
-frame.InputBegan:Connect(startDrag)
-frame.InputChanged:Connect(moveDrag)
-frame.InputEnded:Connect(endDrag)
+    -- ENTIRE FRAME = hitbox for dragging
+    frame.InputBegan:Connect(startDrag)
+    frame.InputChanged:Connect(moveDrag)
+    frame.InputEnded:Connect(endDrag)
 
--- Also attach to the track so clicking directly on it works
-track.InputBegan:Connect(startDrag)
-track.InputChanged:Connect(moveDrag)
-track.InputEnded:Connect(endDrag)
+    -- Track also works for clicking directly on the bar
+    track.InputBegan:Connect(startDrag)
+    track.InputChanged:Connect(moveDrag)
+    track.InputEnded:Connect(endDrag)
 
     updateSlider(defaultValue)
 
