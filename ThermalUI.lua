@@ -1,25 +1,95 @@
 -- ============================================
--- CUSTOM UI — THERMAL LAYOUT
+-- CUSTOM UI — THERMAL LAYOUT (UPDATED)
 -- ============================================
 
 local CustomUI = {}
 CustomUI.Window = nil
 CustomUI.Tabs = {}
 CustomUI.ActiveTab = nil
+CustomUI.Minimized = false
+CustomUI.MinimizeBox = nil
+CustomUI.UIKeybind = "RightControl"  -- default keybind for toggling UI
 
 -- ============================================
--- CREATE WINDOW (uses your exported UI)
+-- CREATE WINDOW
 -- ============================================
 function CustomUI:CreateWindow(config)
     config = config or {}
-    
-    -- ===== BUILD UI (from your export) =====
+    local uiKey = config.UIKeybind or "RightControl"
+
+    -- ===== BUILD UI =====
     local ThermalUI = Instance.new("ScreenGui")
     ThermalUI.Name = "ThermalUI"
     ThermalUI.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
     ThermalUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     ThermalUI.ResetOnSpawn = false
 
+    -- ===== MINIMIZE BOX (outside the main UI) =====
+    local MinBox = Instance.new("Frame")
+    MinBox.Name = "MinBox"
+    MinBox.Parent = ThermalUI
+    MinBox.BackgroundColor3 = Color3.fromRGB(31, 31, 31)
+    MinBox.BorderColor3 = Color3.fromRGB(27, 27, 27)
+    MinBox.BorderSizePixel = 0
+    MinBox.Position = UDim2.new(0.313900322, -250, 0.380288512, -225)
+    MinBox.Size = UDim2.new(0, 40, 0, 40)
+    MinBox.Visible = false  -- hidden by default, shown when UI is minimized
+    MinBox.ClipsDescendants = true
+
+    local MinBoxCorner = Instance.new("UICorner")
+    MinBoxCorner.CornerRadius = UDim.new(8, 8)
+    MinBoxCorner.Parent = MinBox
+
+    local MinBoxLabel = Instance.new("TextLabel")
+    MinBoxLabel.Name = "MinBoxLabel"
+    MinBoxLabel.Parent = MinBox
+    MinBoxLabel.Size = UDim2.new(1, 0, 1, 0)
+    MinBoxLabel.BackgroundTransparency = 1
+    MinBoxLabel.Text = "✦"
+    MinBoxLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    MinBoxLabel.TextSize = 18
+    MinBoxLabel.Font = Enum.Font.GothamBold
+    MinBoxLabel.TextScaled = true
+
+    -- Minimize Box dragging
+    local minDragging = false
+    local minDragStart = nil
+    local minDragOffset = nil
+
+    MinBox.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            minDragging = true
+            minDragStart = input.Position
+            minDragOffset = MinBox.Position
+        end
+    end)
+
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if minDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - minDragStart
+            MinBox.Position = UDim2.new(
+                minDragOffset.X.Scale,
+                minDragOffset.X.Offset + delta.X,
+                minDragOffset.Y.Scale,
+                minDragOffset.Y.Offset + delta.Y
+            )
+        end
+    end)
+
+    game:GetService("UserInputService").InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            minDragging = false
+        end
+    end)
+
+    -- Click to restore UI
+    MinBox.MouseButton1Click:Connect(function()
+        CustomUI.Minimized = false
+        MainFrame.Visible = true
+        MinBox.Visible = false
+    end)
+
+    -- ===== MAIN FRAME =====
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainFrame"
     MainFrame.Parent = ThermalUI
@@ -30,7 +100,7 @@ function CustomUI:CreateWindow(config)
     MainFrame.Position = UDim2.new(0.313900322, -250, 0.380288512, -225)
     MainFrame.Size = UDim2.new(0, 1075, 0, 583)
 
-    -- Topbar
+    -- ===== TOPBAR =====
     local Topbar = Instance.new("Frame")
     Topbar.Name = "Topbar"
     Topbar.Parent = MainFrame
@@ -39,26 +109,68 @@ function CustomUI:CreateWindow(config)
     Topbar.ClipsDescendants = true
     Topbar.Size = UDim2.new(0, 1075, 0, 25)
 
+    -- ===== TOPBAR LEFT TEXT (grey, low-visibility) =====
+    local TopText = Instance.new("TextLabel")
+    TopText.Name = "TopText"
+    TopText.Parent = Topbar
+    TopText.Size = UDim2.new(0.5, 0, 1, 0)
+    TopText.Position = UDim2.new(0, 10, 0, 0)
+    TopText.BackgroundTransparency = 1
+    TopText.Text = config.TopText or "MYX Arsenal v1.0"
+    TopText.TextColor3 = Color3.fromRGB(80, 80, 85)
+    TopText.TextSize = 12
+    TopText.TextXAlignment = Enum.TextXAlignment.Left
+    TopText.Font = Enum.Font.GothamMedium
+
+    -- ===== MINIMIZE BUTTON (near X) =====
+    local MinButton = Instance.new("TextButton")
+    MinButton.Name = "MinButton"
+    MinButton.Parent = Topbar
+    MinButton.BackgroundColor3 = Color3.fromRGB(39, 39, 39)
+    MinButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+    MinButton.BorderSizePixel = 0
+    MinButton.Position = UDim2.new(0.945, 0, 0, 0)
+    MinButton.Size = UDim2.new(0, 25, 0, 25)
+    MinButton.Font = Enum.Font.SourceSans
+    MinButton.Text = "—"
+    MinButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    MinButton.TextSize = 14
+
+    local MinButtonCorner = Instance.new("UICorner")
+    MinButtonCorner.CornerRadius = UDim.new(8, 8)
+    MinButtonCorner.Parent = MinButton
+
+    MinButton.MouseButton1Click:Connect(function()
+        CustomUI.Minimized = true
+        MainFrame.Visible = false
+        MinBox.Visible = true
+        -- Position MinBox where the UI was
+        MinBox.Position = MainFrame.Position
+    end)
+
+    -- ===== CLOSE BUTTON =====
     local CloseButton = Instance.new("TextButton")
     CloseButton.Name = "CloseButton"
     CloseButton.Parent = Topbar
     CloseButton.BackgroundColor3 = Color3.fromRGB(39, 39, 39)
     CloseButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
     CloseButton.BorderSizePixel = 0
-    CloseButton.Position = UDim2.new(0.968379021, 0, 0, 0)
+    CloseButton.Position = UDim2.new(0.968, 0, 0, 0)
     CloseButton.Size = UDim2.new(0, 25, 0, 25)
     CloseButton.Font = Enum.Font.SourceSans
     CloseButton.Text = "X"
     CloseButton.TextColor3 = Color3.fromRGB(255, 0, 0)
     CloseButton.TextSize = 14
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(8, 8)
-    UICorner.Parent = CloseButton
+
+    local CloseButtonCorner = Instance.new("UICorner")
+    CloseButtonCorner.CornerRadius = UDim.new(8, 8)
+    CloseButtonCorner.Parent = CloseButton
+
     CloseButton.MouseButton1Click:Connect(function()
         ThermalUI:Destroy()
     end)
 
-    -- LogoContainer
+    -- ===== LOGO CONTAINER =====
     local LogoContainer = Instance.new("Frame")
     LogoContainer.Name = "LogoContainer"
     LogoContainer.Parent = MainFrame
@@ -79,7 +191,7 @@ function CustomUI:CreateWindow(config)
     Logo.Image = config.LogoID or "rbxassetid://137394765830675"
     Logo.ScaleType = Enum.ScaleType.Fit
 
-    -- TabContainer
+    -- ===== TAB CONTAINER =====
     local TabContainer = Instance.new("Frame")
     TabContainer.Name = "TabContainer"
     TabContainer.Parent = MainFrame
@@ -87,8 +199,9 @@ function CustomUI:CreateWindow(config)
     TabContainer.BorderColor3 = Color3.fromRGB(27, 27, 27)
     TabContainer.Position = UDim2.new(0.00558139523, 0, 0.487135559, 0)
     TabContainer.Size = UDim2.new(0, 467, 0, 293)
+    TabContainer.ClipsDescendants = true
 
-    -- Content Containers (two columns)
+    -- ===== CONTENT CONTAINERS =====
     local ContentContainer1 = Instance.new("Frame")
     ContentContainer1.Name = "ContentContainer1"
     ContentContainer1.Parent = MainFrame
@@ -107,7 +220,7 @@ function CustomUI:CreateWindow(config)
     ContentContainer2.Size = UDim2.new(0, 294, 0, 545)
     ContentContainer2.ClipsDescendants = true
 
-    -- Dragging
+    -- ===== DRAGGING (Main Frame) =====
     local dragging = false
     local dragStart = nil
     local dragOffset = nil
@@ -138,24 +251,65 @@ function CustomUI:CreateWindow(config)
         end
     end)
 
+    -- ===== UI KEYBIND TOGGLE =====
+    local uiKeybindEnabled = true
+    game:GetService("UserInputService").InputBegan:Connect(function(input, GPE)
+        if GPE then return end
+        if input.KeyCode == Enum.KeyCode[uiKey] and input.UserInputType == Enum.UserInputType.Keyboard then
+            if uiKeybindEnabled then
+                if MainFrame.Visible then
+                    CustomUI.Minimized = true
+                    MainFrame.Visible = false
+                    MinBox.Visible = true
+                    MinBox.Position = MainFrame.Position
+                else
+                    CustomUI.Minimized = false
+                    MainFrame.Visible = true
+                    MinBox.Visible = false
+                end
+            end
+        end
+    end)
+
     -- ===== STORE WINDOW REFERENCE =====
     self.Window = {
         ThermalUI = ThermalUI,
         MainFrame = MainFrame,
         Topbar = Topbar,
+        TopText = TopText,
+        MinBox = MinBox,
+        MinButton = MinButton,
+        CloseButton = CloseButton,
         TabContainer = TabContainer,
         Content1 = ContentContainer1,
         Content2 = ContentContainer2,
         Logo = Logo,
         Tabs = {},
-        ActiveTab = nil
+        ActiveTab = nil,
+        UIKeybind = uiKey,
+        Toggle = function()
+            if MainFrame.Visible then
+                CustomUI.Minimized = true
+                MainFrame.Visible = false
+                MinBox.Visible = true
+                MinBox.Position = MainFrame.Position
+            else
+                CustomUI.Minimized = false
+                MainFrame.Visible = true
+                MinBox.Visible = false
+            end
+        end,
+        SetKeybind = function(key)
+            uiKey = key
+            self.Window.UIKeybind = key
+        end
     }
 
     return self.Window
 end
 
 -- ============================================
--- CREATE TAB
+-- CREATE TAB (updated — text centered properly)
 -- ============================================
 function CustomUI:CreateTab(window, config)
     config = config or {}
@@ -177,7 +331,7 @@ function CustomUI:CreateTab(window, config)
     btn.TextColor3 = Color3.fromRGB(200, 200, 200)
     btn.TextSize = 14
     btn.Font = Enum.Font.GothamMedium
-    btn.TextXAlignment = Enum.TextXAlignment.Left
+    btn.TextXAlignment = Enum.TextXAlignment.Center  -- Centered!
     btn.Parent = window.TabContainer
 
     -- Hover effect
@@ -190,17 +344,17 @@ function CustomUI:CreateTab(window, config)
         end
     end)
 
-    -- Active indicator
+    -- Active indicator (now positioned to the LEFT of text)
     local indicator = Instance.new("Frame")
     indicator.Name = "Indicator"
     indicator.Size = UDim2.new(0, 3, 0, 25)
-    indicator.Position = UDim2.new(0, 0, 0.5, -12.5)
+    indicator.Position = UDim2.new(0, 0, 0.5, -12.5)  -- Left edge
     indicator.BackgroundColor3 = Color3.fromRGB(70, 130, 255)
     indicator.BorderSizePixel = 0
     indicator.Visible = false
     indicator.Parent = btn
 
-    -- Tab pages (one for each content container)
+    -- ===== TAB PAGES =====
     local page1 = Instance.new("ScrollingFrame")
     page1.Name = tabName .. "_Page1"
     page1.Size = UDim2.new(1, 0, 1, 0)
@@ -271,7 +425,87 @@ function CustomUI:CreateTab(window, config)
 end
 
 -- ============================================
--- HELPERS
+-- CREATE KEYBIND (for UI)
+-- ============================================
+function CustomUI:CreateKeybind(window, config)
+    config = config or {}
+    local name = config.Name or "UI Keybind"
+    local defaultKey = config.DefaultKey or "RightControl"
+    local callback = config.Callback or function() end
+
+    local keybind = {}
+    keybind.Name = name
+    keybind.Key = defaultKey
+    keybind.Listening = false
+
+    local frame = Instance.new("Frame")
+    frame.Name = name .. "Keybind"
+    frame.Size = UDim2.new(1, -20, 0, 30)
+    frame.BackgroundTransparency = 1
+    frame.Parent = window.Tabs[1].Page1  -- or wherever you want it
+
+    local label = Instance.new("TextLabel")
+    label.Name = "Label"
+    label.Size = UDim2.new(0.5, 0, 1, 0)
+    label.Position = UDim2.new(0, 10, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Text = name
+    label.TextColor3 = Color3.fromRGB(200, 200, 200)
+    label.TextSize = 13
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Font = Enum.Font.GothamMedium
+    label.Parent = frame
+
+    local keyBtn = Instance.new("TextButton")
+    keyBtn.Name = "KeyBtn"
+    keyBtn.Size = UDim2.new(0.3, 0, 1, 0)
+    keyBtn.Position = UDim2.new(0.7, 0, 0, 0)
+    keyBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+    keyBtn.BorderSizePixel = 0
+    keyBtn.Text = defaultKey
+    keyBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+    keyBtn.TextSize = 13
+    keyBtn.Font = Enum.Font.GothamMedium
+    keyBtn.Parent = frame
+
+    local function updateKey(key)
+        local keyName = tostring(key):gsub("Enum.KeyCode.", "")
+        if keyName == "Unknown" then keyName = "None" end
+        keybind.Key = keyName
+        keyBtn.Text = keyName
+        keybind.Listening = false
+        window:SetKeybind(keyName)
+        callback(keyName)
+    end
+
+    keyBtn.MouseButton1Click:Connect(function()
+        keybind.Listening = not keybind.Listening
+        if keybind.Listening then
+            keyBtn.Text = "..."
+            keyBtn.BackgroundColor3 = Color3.fromRGB(70, 130, 255)
+            local con
+            con = game:GetService("UserInputService").InputBegan:Connect(function(input, GPE)
+                if GPE then return end
+                if input.UserInputType == Enum.UserInputType.Keyboard then
+                    con:Disconnect()
+                    updateKey(input.KeyCode)
+                    keyBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+                end
+            end)
+        else
+            keyBtn.Text = keybind.Key
+            keyBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+        end
+    end)
+
+    keybind.Frame = frame
+    keybind.Update = updateKey
+
+    return keybind
+end
+
+-- ============================================
+-- GET ACTIVE PAGE / LAYOUT
 -- ============================================
 function CustomUI:GetActivePage(tab, side)
     if side == 1 then return tab.Page1 else return tab.Page2 end
@@ -684,89 +918,6 @@ function CustomUI:CreateDropdown(tab, config, side)
     tab.Elements[#tab.Elements + 1] = dropdown
 
     return dropdown
-end
-
--- ============================================
--- CREATE KEYBIND
--- ============================================
-function CustomUI:CreateKeybind(tab, config, side)
-    side = side or 1
-    local name = config.Name or "Keybind"
-    local defaultKey = config.DefaultKey or "None"
-    local callback = config.Callback or function() end
-
-    local page = self:GetActivePage(tab, side)
-    local layout = self:GetActiveLayout(tab, side)
-
-    local keybind = {}
-    keybind.Name = name
-    keybind.Key = defaultKey
-    keybind.Listening = false
-
-    local frame = Instance.new("Frame")
-    frame.Name = name .. "Keybind"
-    frame.Size = UDim2.new(1, -20, 0, 30)
-    frame.BackgroundTransparency = 1
-    frame.Parent = page
-
-    local label = Instance.new("TextLabel")
-    label.Name = "Label"
-    label.Size = UDim2.new(0.5, 0, 1, 0)
-    label.Position = UDim2.new(0, 10, 0, 0)
-    label.BackgroundTransparency = 1
-    label.Text = name
-    label.TextColor3 = Color3.fromRGB(200, 200, 200)
-    label.TextSize = 13
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Font = Enum.Font.GothamMedium
-    label.Parent = frame
-
-    local keyBtn = Instance.new("TextButton")
-    keyBtn.Name = "KeyBtn"
-    keyBtn.Size = UDim2.new(0.3, 0, 1, 0)
-    keyBtn.Position = UDim2.new(0.7, 0, 0, 0)
-    keyBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-    keyBtn.BorderSizePixel = 0
-    keyBtn.Text = defaultKey
-    keyBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-    keyBtn.TextSize = 13
-    keyBtn.Font = Enum.Font.GothamMedium
-    keyBtn.Parent = frame
-
-    local function updateKey(key)
-        local keyName = tostring(key):gsub("Enum.KeyCode.", "")
-        if keyName == "Unknown" then keyName = "None" end
-        keybind.Key = keyName
-        keyBtn.Text = keyName
-        keybind.Listening = false
-        callback(keyName)
-    end
-
-    keyBtn.MouseButton1Click:Connect(function()
-        keybind.Listening = not keybind.Listening
-        if keybind.Listening then
-            keyBtn.Text = "..."
-            keyBtn.BackgroundColor3 = Color3.fromRGB(70, 130, 255)
-            local con
-            con = game:GetService("UserInputService").InputBegan:Connect(function(input, GPE)
-                if GPE then return end
-                if input.UserInputType == Enum.UserInputType.Keyboard then
-                    con:Disconnect()
-                    updateKey(input.KeyCode)
-                    keyBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-                end
-            end)
-        else
-            keyBtn.Text = keybind.Key
-            keyBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-        end
-    end)
-
-    keybind.Frame = frame
-    keybind.Update = updateKey
-    tab.Elements[#tab.Elements + 1] = keybind
-
-    return keybind
 end
 
 -- ============================================
