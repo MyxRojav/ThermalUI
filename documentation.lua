@@ -192,3 +192,15 @@ CustomUI:CreateButton(thirdTab, {
 }, 1)
 
 print("UI Showcase loaded! Toggle UI with RightControl.")
+
+local settingsTab = CustomUI:CreateTab(window, { Name = "Settings" })
+
+CustomUI:CreateKeybind(settingsTab, {
+    Name = "UI Toggle Keybind",
+    DefaultKey = "RightControl",
+    Callback = function(key)
+        -- Update the UI's toggle keybind
+        window:SetKeybind(key)
+        print("UI keybind set to:", key)
+    end
+}, 1)
