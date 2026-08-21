@@ -23,7 +23,7 @@ function CustomUI:CreateWindow(config)
     ThermalUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     ThermalUI.ResetOnSpawn = false
 
--- ===== MINIMIZE BOX (TextButton — clickable) =====
+-- ===== MINIMIZE BOX (TextButton) =====
 local MinBox = Instance.new("TextButton")
 MinBox.Name = "MinBox"
 MinBox.Parent = ThermalUI
@@ -43,11 +43,46 @@ local MinBoxCorner = Instance.new("UICorner")
 MinBoxCorner.CornerRadius = UDim.new(8, 8)
 MinBoxCorner.Parent = MinBox
 
--- Click to toggle UI back
+-- === DRAGGING (Minimize Box) ===
+local minDragging = false
+local minDragStart = nil
+local minDragOffset = nil
+
+MinBox.MouseButton1Down:Connect(function()
+    minDragging = true
+    minDragStart = game:GetService("UserInputService"):GetMouseLocation()
+    minDragOffset = MinBox.Position
+end)
+
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if minDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local currentPos = game:GetService("UserInputService"):GetMouseLocation()
+        local delta = currentPos - minDragStart
+        MinBox.Position = UDim2.new(
+            minDragOffset.X.Scale,
+            minDragOffset.X.Offset + delta.X,
+            minDragOffset.Y.Scale,
+            minDragOffset.Y.Offset + delta.Y
+        )
+    end
+end)
+
+game:GetService("UserInputService").InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        minDragging = false
+    end
+end)
+
+-- === CLICK TO RESTORE (only if not dragging) ===
+local minClickTime = 0
 MinBox.MouseButton1Click:Connect(function()
-    CustomUI.Minimized = false
-    MainFrame.Visible = true
-    MinBox.Visible = false
+    -- Only restore if it was a click, not a drag
+    if tick() - minClickTime > 0.1 then
+        CustomUI.Minimized = false
+        MainFrame.Visible = true
+        MinBox.Visible = false
+    end
+    minClickTime = tick()
 end)
 
     -- ===== MAIN FRAME =====
@@ -607,32 +642,38 @@ function CustomUI:CreateSlider(tab, config, side)
     end
 
     local dragging = false
-    local function onInputBegan(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-            local pos = input.Position.X - track.AbsolutePosition.X
-            local percent = math.clamp(pos / track.AbsoluteSize.X, 0, 1)
-            updateSlider(min + (max - min) * percent)
-        end
+local function startDrag(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        local pos = input.Position.X - track.AbsolutePosition.X
+        local percent = math.clamp(pos / track.AbsoluteSize.X, 0, 1)
+        updateSlider(min + (max - min) * percent)
     end
+end
 
-    local function onInputChanged(input)
-        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local pos = input.Position.X - track.AbsolutePosition.X
-            local percent = math.clamp(pos / track.AbsoluteSize.X, 0, 1)
-            updateSlider(min + (max - min) * percent)
-        end
+local function moveDrag(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local pos = input.Position.X - track.AbsolutePosition.X
+        local percent = math.clamp(pos / track.AbsoluteSize.X, 0, 1)
+        updateSlider(min + (max - min) * percent)
     end
+end
 
-    local function onInputEnded(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = false
-        end
+local function endDrag(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
     end
+end
 
-    track.InputBegan:Connect(onInputBegan)
-    track.InputChanged:Connect(onInputChanged)
-    track.InputEnded:Connect(onInputEnded)
+-- Attach to the ENTIRE slider frame, not just the track
+frame.InputBegan:Connect(startDrag)
+frame.InputChanged:Connect(moveDrag)
+frame.InputEnded:Connect(endDrag)
+
+-- Also attach to the track so clicking directly on it works
+track.InputBegan:Connect(startDrag)
+track.InputChanged:Connect(moveDrag)
+track.InputEnded:Connect(endDrag)
 
     updateSlider(defaultValue)
 
