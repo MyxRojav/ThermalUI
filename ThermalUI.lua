@@ -13,8 +13,8 @@ CustomUI.UIKeybind = "RightControl"
 -- ============================================
 function CustomUI:CreateWindow(config)
     config = config or {}
-    local uiKey = config.UIKeybind or "RightControl"
-    local currentUIKey = uiKey  -- MUTABLE live reference
+    local uiKey = type(config.UIKeybind) == "string" and config.UIKeybind or "RightControl"
+    local currentUIKey = uiKey
 
     local ThermalUI = Instance.new("ScreenGui")
     ThermalUI.Name = "ThermalUI"
@@ -31,7 +31,7 @@ function CustomUI:CreateWindow(config)
     MinBox.BorderSizePixel = 0
     MinBox.Position = UDim2.new(0.313900322, -250, 0.380288512, -225)
     MinBox.Size = UDim2.new(0, 40, 0, 40)
-    MinBox.Visible = true  -- ALWAYS VISIBLE
+    MinBox.Visible = true
     MinBox.ClipsDescendants = true
     MinBox.Text = "✦"
     MinBox.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -42,21 +42,24 @@ function CustomUI:CreateWindow(config)
     MinBoxCorner.CornerRadius = UDim.new(8, 8)
     MinBoxCorner.Parent = MinBox
 
-    -- === DRAGGING (Minimize Box) ===
+    -- === DRAGGING (Minimize Box) — MOBILE + PC ===
     local minDragging = false
     local minDragStart = nil
     local minDragOffset = nil
+    local minDragInput = nil
 
-    MinBox.MouseButton1Down:Connect(function()
-        minDragging = true
-        minDragStart = game:GetService("UserInputService"):GetMouseLocation()
-        minDragOffset = MinBox.Position
-    end)
+    local function onMinInputBegan(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            minDragging = true
+            minDragInput = input
+            minDragStart = input.Position
+            minDragOffset = MinBox.Position
+        end
+    end
 
-    game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if minDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local currentPos = game:GetService("UserInputService"):GetMouseLocation()
-            local delta = currentPos - minDragStart
+    local function onMinInputChanged(input)
+        if minDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - minDragStart
             MinBox.Position = UDim2.new(
                 minDragOffset.X.Scale,
                 minDragOffset.X.Offset + delta.X,
@@ -64,21 +67,22 @@ function CustomUI:CreateWindow(config)
                 minDragOffset.Y.Offset + delta.Y
             )
         end
-    end)
+    end
 
-    game:GetService("UserInputService").InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+    local function onMinInputEnded(input)
+        if minDragging and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
             minDragging = false
+            minDragInput = nil
         end
-    end)
+    end
+
+    MinBox.InputBegan:Connect(onMinInputBegan)
+    MinBox.InputChanged:Connect(onMinInputChanged)
+    MinBox.InputEnded:Connect(onMinInputEnded)
 
     -- === CLICK TO TOGGLE UI ===
     MinBox.MouseButton1Click:Connect(function()
-        if MainFrame.Visible then
-            MainFrame.Visible = false
-        else
-            MainFrame.Visible = true
-        end
+        MainFrame.Visible = not MainFrame.Visible
     end)
 
     -- ===== MAIN FRAME =====
@@ -108,13 +112,13 @@ function CustomUI:CreateWindow(config)
     TopText.Size = UDim2.new(0.5, 0, 1, 0)
     TopText.Position = UDim2.new(0, 10, 0, 0)
     TopText.BackgroundTransparency = 1
-    TopText.Text = config.TopText or "MYX Arsenal v1.0"
+    TopText.Text = type(config.TopText) == "string" and config.TopText or "MYX Arsenal v1.0"
     TopText.TextColor3 = Color3.fromRGB(80, 80, 85)
     TopText.TextSize = 12
     TopText.TextXAlignment = Enum.TextXAlignment.Left
     TopText.Font = Enum.Font.GothamMedium
 
-    -- ===== MINIMIZE BUTTON (hides UI, shows MinBox) =====
+    -- ===== MINIMIZE BUTTON =====
     local MinButton = Instance.new("TextButton")
     MinButton.Name = "MinButton"
     MinButton.Parent = Topbar
@@ -176,7 +180,7 @@ function CustomUI:CreateWindow(config)
     Logo.BorderSizePixel = 0
     Logo.Position = UDim2.new(0.0337153412, 0, 0.263445824, 0)
     Logo.Size = UDim2.new(0, 418, 0, 113)
-    Logo.Image = config.LogoID or "rbxassetid://137394765830675"
+    Logo.Image = type(config.LogoID) == "string" and config.LogoID or "rbxassetid://137394765830675"
     Logo.ScaleType = Enum.ScaleType.Fit
 
     -- ===== TAB CONTAINER =====
@@ -208,21 +212,21 @@ function CustomUI:CreateWindow(config)
     ContentContainer2.Size = UDim2.new(0, 294, 0, 545)
     ContentContainer2.ClipsDescendants = true
 
-    -- ===== DRAGGING (Main Frame) =====
+    -- ===== DRAGGING (Main Frame) — MOBILE + PC =====
     local dragging = false
     local dragStart = nil
     local dragOffset = nil
 
-    Topbar.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+    local function onMainInputBegan(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
             dragStart = input.Position
             dragOffset = MainFrame.Position
         end
-    end)
+    end
 
-    game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+    local function onMainInputChanged(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
             local delta = input.Position - dragStart
             MainFrame.Position = UDim2.new(
                 dragOffset.X.Scale,
@@ -231,18 +235,24 @@ function CustomUI:CreateWindow(config)
                 dragOffset.Y.Offset + delta.Y
             )
         end
-    end)
+    end
 
-    game:GetService("UserInputService").InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+    local function onMainInputEnded(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
             dragging = false
         end
-    end)
+    end
+
+    Topbar.InputBegan:Connect(onMainInputBegan)
+    Topbar.InputChanged:Connect(onMainInputChanged)
+    Topbar.InputEnded:Connect(onMainInputEnded)
 
     -- ===== UI KEYBIND (LIVE REFERENCE) =====
     game:GetService("UserInputService").InputBegan:Connect(function(input, GPE)
         if GPE then return end
-        if input.KeyCode == Enum.KeyCode[currentUIKey] and input.UserInputType == Enum.UserInputType.Keyboard then
+        -- Ensure currentUIKey is a string
+        local key = type(currentUIKey) == "string" and currentUIKey or "RightControl"
+        if input.KeyCode == Enum.KeyCode[key] and input.UserInputType == Enum.UserInputType.Keyboard then
             MainFrame.Visible = not MainFrame.Visible
         end
     end)
@@ -267,8 +277,13 @@ function CustomUI:CreateWindow(config)
             MainFrame.Visible = not MainFrame.Visible
         end,
         SetKeybind = function(key)
-            currentUIKey = key
-            self.Window.UIKeybind = key
+            if type(key) == "string" then
+                currentUIKey = key
+                self.Window.UIKeybind = key
+                print("UI keybind updated to:", key)
+            else
+                warn("SetKeybind requires a string key name, got:", type(key))
+            end
         end
     }
 
@@ -280,8 +295,8 @@ end
 -- ============================================
 function CustomUI:CreateTab(window, config)
     config = config or {}
-    local tabName = config.Name or "Tab"
-    
+    local tabName = type(config.Name) == "string" and config.Name or "Tab"
+
     local tab = {}
     tab.Name = tabName
     tab.Elements = {}
@@ -400,15 +415,15 @@ end
 -- ============================================
 function CustomUI:CreateSection(tab, config, side)
     side = side or 1
-    local name = config.Name or "Section"
-    
+    local name = type(config.Name) == "string" and config.Name or "Section"
+
     local page = self:GetActivePage(tab, side)
     local layout = self:GetActiveLayout(tab, side)
 
     local section = {}
     section.Name = name
     section.Elements = {}
-    
+
     local frame = Instance.new("Frame")
     frame.Name = name .. "Section"
     frame.Size = UDim2.new(1, 0, 0, 30)
@@ -447,9 +462,9 @@ end
 -- ============================================
 function CustomUI:CreateToggle(tab, config, side)
     side = side or 1
-    local name = config.Name or "Toggle"
-    local callback = config.Callback or function() end
-    local defaultValue = config.DefaultValue or false
+    local name = type(config.Name) == "string" and config.Name or "Toggle"
+    local callback = type(config.Callback) == "function" and config.Callback or function() end
+    local defaultValue = type(config.DefaultValue) == "boolean" and config.DefaultValue or false
 
     local page = self:GetActivePage(tab, side)
     local layout = self:GetActiveLayout(tab, side)
@@ -527,16 +542,16 @@ function CustomUI:CreateToggle(tab, config, side)
 end
 
 -- ============================================
--- CREATE SLIDER (FIXED — full frame hitbox)
+-- CREATE SLIDER
 -- ============================================
 function CustomUI:CreateSlider(tab, config, side)
     side = side or 1
-    local name = config.Name or "Slider"
-    local min = config.Min or 0
-    local max = config.Max or 100
-    local increment = config.Increment or 1
-    local defaultValue = config.DefaultValue or 50
-    local callback = config.Callback or function() end
+    local name = type(config.Name) == "string" and config.Name or "Slider"
+    local min = type(config.Min) == "number" and config.Min or 0
+    local max = type(config.Max) == "number" and config.Max or 100
+    local increment = type(config.Increment) == "number" and config.Increment or 1
+    local defaultValue = type(config.DefaultValue) == "number" and config.DefaultValue or 50
+    local callback = type(config.Callback) == "function" and config.Callback or function() end
 
     local page = self:GetActivePage(tab, side)
     local layout = self:GetActiveLayout(tab, side)
@@ -613,7 +628,7 @@ function CustomUI:CreateSlider(tab, config, side)
 
     local dragging = false
     local function startDrag(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
             local pos = input.Position.X - track.AbsolutePosition.X
             local percent = math.clamp(pos / track.AbsoluteSize.X, 0, 1)
@@ -622,7 +637,7 @@ function CustomUI:CreateSlider(tab, config, side)
     end
 
     local function moveDrag(input)
-        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
             local pos = input.Position.X - track.AbsolutePosition.X
             local percent = math.clamp(pos / track.AbsoluteSize.X, 0, 1)
             updateSlider(min + (max - min) * percent)
@@ -630,17 +645,15 @@ function CustomUI:CreateSlider(tab, config, side)
     end
 
     local function endDrag(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
             dragging = false
         end
     end
 
-    -- ENTIRE FRAME = hitbox for dragging
     frame.InputBegan:Connect(startDrag)
     frame.InputChanged:Connect(moveDrag)
     frame.InputEnded:Connect(endDrag)
 
-    -- Track also works for clicking directly on the bar
     track.InputBegan:Connect(startDrag)
     track.InputChanged:Connect(moveDrag)
     track.InputEnded:Connect(endDrag)
@@ -659,8 +672,8 @@ end
 -- ============================================
 function CustomUI:CreateButton(tab, config, side)
     side = side or 1
-    local name = config.Name or "Button"
-    local callback = config.Callback or function() end
+    local name = type(config.Name) == "string" and config.Name or "Button"
+    local callback = type(config.Callback) == "function" and config.Callback or function() end
 
     local page = self:GetActivePage(tab, side)
     local layout = self:GetActiveLayout(tab, side)
@@ -700,10 +713,10 @@ end
 -- ============================================
 function CustomUI:CreateDropdown(tab, config, side)
     side = side or 1
-    local name = config.Name or "Dropdown"
-    local options = config.Options or {"Option 1", "Option 2"}
-    local defaultOption = config.DefaultOption or options[1]
-    local callback = config.Callback or function() end
+    local name = type(config.Name) == "string" and config.Name or "Dropdown"
+    local options = type(config.Options) == "table" and config.Options or {"Option 1", "Option 2"}
+    local defaultOption = type(config.DefaultOption) == "string" and config.DefaultOption or options[1]
+    local callback = type(config.Callback) == "function" and config.Callback or function() end
 
     local page = self:GetActivePage(tab, side)
     local layout = self:GetActiveLayout(tab, side)
@@ -811,9 +824,9 @@ end
 -- ============================================
 function CustomUI:CreateKeybind(tab, config, side)
     side = side or 1
-    local name = config.Name or "Keybind"
-    local defaultKey = config.DefaultKey or "None"
-    local callback = config.Callback or function() end
+    local name = type(config.Name) == "string" and config.Name or "Keybind"
+    local defaultKey = type(config.DefaultKey) == "string" and config.DefaultKey or "None"
+    local callback = type(config.Callback) == "function" and config.Callback or function() end
 
     local page = self:GetActivePage(tab, side)
     local layout = self:GetActiveLayout(tab, side)
