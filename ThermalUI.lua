@@ -810,14 +810,19 @@ function CustomUI:CreateKeybind(tab, config, side)
     keyBtn.Parent = frame
 
     local function updateKey(key)
-        local keyName = tostring(key):gsub("Enum.KeyCode.", "")
-        if keyName == "Unknown" then keyName = "None" end
-        keybind.Key = keyName
-        keyBtn.Text = keyName
-        keybind.Listening = false
-        -- Call the user callback to update UI keybind
-        if callback then callback(keyName) end
+    local keyName = tostring(key):gsub("Enum.KeyCode.", "")
+    if keyName == "Unknown" then keyName = "None" end
+    keybind.Key = keyName
+    keyBtn.Text = keyName
+    keybind.Listening = false
+    -- Call the user callback with the string key
+    if callback and type(callback) == "function" then
+        local success, err = pcall(callback, keyName)
+        if not success then
+            warn("Keybind callback error:", err)
+        end
     end
+end
 
     keyBtn.MouseButton1Click:Connect(function()
         keybind.Listening = not keybind.Listening
