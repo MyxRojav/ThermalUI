@@ -1,5 +1,5 @@
 -- ============================================
--- MYX UI — FINAL WORKING VERSION
+-- CUSTOM UI — CLEAN VERSION
 -- ============================================
 
 local CustomUI = {}
@@ -10,15 +10,13 @@ CustomUI.ActiveTab = nil
 function CustomUI:CreateWindow(config)
     config = config or {}
     
-    -- KEYBIND REFERENCE (table, not string — so it updates live)
-    local keyRef = {
-        key = type(config.UIKeybind) == "string" and config.UIKeybind or "RightControl"
-    }
+    local toggleKey = type(config.UIKeybind) == "string" and config.UIKeybind or "RightControl"
+    local keyLock = false
 
-    -- ===== CREATE GUI =====
     local ThermalUI = Instance.new("ScreenGui")
     ThermalUI.Name = "ThermalUI"
     ThermalUI.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+    ThermalUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     ThermalUI.ResetOnSpawn = false
 
     -- ===== MAIN FRAME =====
@@ -31,30 +29,6 @@ function CustomUI:CreateWindow(config)
     MainFrame.ClipsDescendants = true
     MainFrame.Position = UDim2.new(0.313900322, -250, 0.380288512, -225)
     MainFrame.Size = UDim2.new(0, 1075, 0, 583)
-
-    -- ===== MINIMIZE BOX (toggles UI) =====
-    local MinBox = Instance.new("TextButton")
-    MinBox.Name = "MinBox"
-    MinBox.Parent = ThermalUI
-    MinBox.BackgroundColor3 = Color3.fromRGB(31, 31, 31)
-    MinBox.BorderColor3 = Color3.fromRGB(27, 27, 27)
-    MinBox.BorderSizePixel = 0
-    MinBox.Position = UDim2.new(0.313900322, -250, 0.380288512, -225)
-    MinBox.Size = UDim2.new(0, 40, 0, 40)
-    MinBox.Visible = true
-    MinBox.ClipsDescendants = true
-    MinBox.Text = "✦"
-    MinBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    MinBox.TextSize = 18
-    MinBox.Font = Enum.Font.GothamBold
-
-    local MinBoxCorner = Instance.new("UICorner")
-    MinBoxCorner.CornerRadius = UDim.new(8, 8)
-    MinBoxCorner.Parent = MinBox
-
-    MinBox.MouseButton1Click:Connect(function()
-        MainFrame.Visible = not MainFrame.Visible
-    end)
 
     -- ===== TOPBAR =====
     local Topbar = Instance.new("Frame")
@@ -77,28 +51,6 @@ function CustomUI:CreateWindow(config)
     TopText.TextXAlignment = Enum.TextXAlignment.Left
     TopText.Font = Enum.Font.GothamMedium
 
-    -- ===== MINIMIZE BUTTON (hides UI) =====
-    local MinButton = Instance.new("TextButton")
-    MinButton.Name = "MinButton"
-    MinButton.Parent = Topbar
-    MinButton.BackgroundColor3 = Color3.fromRGB(39, 39, 39)
-    MinButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
-    MinButton.BorderSizePixel = 0
-    MinButton.Position = UDim2.new(0.945, 0, 0, 0)
-    MinButton.Size = UDim2.new(0, 25, 0, 25)
-    MinButton.Font = Enum.Font.SourceSans
-    MinButton.Text = "—"
-    MinButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    MinButton.TextSize = 14
-
-    local MinButtonCorner = Instance.new("UICorner")
-    MinButtonCorner.CornerRadius = UDim.new(8, 8)
-    MinButtonCorner.Parent = MinButton
-
-    MinButton.MouseButton1Click:Connect(function()
-        MainFrame.Visible = false
-    end)
-
     -- ===== CLOSE BUTTON =====
     local CloseButton = Instance.new("TextButton")
     CloseButton.Name = "CloseButton"
@@ -119,6 +71,37 @@ function CustomUI:CreateWindow(config)
 
     CloseButton.MouseButton1Click:Connect(function()
         ThermalUI:Destroy()
+    end)
+
+    -- ===== DRAGGING (Topbar) =====
+    local dragging = false
+    local dragStart = nil
+    local dragOffset = nil
+
+    Topbar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            dragOffset = MainFrame.Position
+        end
+    end)
+
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragStart
+            MainFrame.Position = UDim2.new(
+                dragOffset.X.Scale,
+                dragOffset.X.Offset + delta.X,
+                dragOffset.Y.Scale,
+                dragOffset.Y.Offset + delta.Y
+            )
+        end
+    end)
+
+    game:GetService("UserInputService").InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
     end)
 
     -- ===== LOGO =====
@@ -171,45 +154,13 @@ function CustomUI:CreateWindow(config)
     ContentContainer2.Size = UDim2.new(0, 294, 0, 545)
     ContentContainer2.ClipsDescendants = true
 
-    -- ===== DRAGGING (Topbar) =====
-    local dragging = false
-    local dragStart = nil
-    local dragOffset = nil
-
-    Topbar.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-            dragStart = input.Position
-            dragOffset = MainFrame.Position
-        end
-    end)
-
-    game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local delta = input.Position - dragStart
-            MainFrame.Position = UDim2.new(
-                dragOffset.X.Scale,
-                dragOffset.X.Offset + delta.X,
-                dragOffset.Y.Scale,
-                dragOffset.Y.Offset + delta.Y
-            )
-        end
-    end)
-
-    game:GetService("UserInputService").InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = false
-        end
-    end)
-
-    -- ===== THE KEYBIND LISTENER (LIVE REFERENCE) =====
+    -- ===== KEYBIND =====
     game:GetService("UserInputService").InputBegan:Connect(function(input, GPE)
         if GPE then return end
         if input.UserInputType == Enum.UserInputType.Keyboard then
             local pressedKey = tostring(input.KeyCode):gsub("Enum.KeyCode.", "")
-            if pressedKey == keyRef.key then
+            if pressedKey == toggleKey then
                 MainFrame.Visible = not MainFrame.Visible
-                print("Keybind triggered: " .. keyRef.key) -- debug
             end
         end
     end)
@@ -220,8 +171,6 @@ function CustomUI:CreateWindow(config)
         MainFrame = MainFrame,
         Topbar = Topbar,
         TopText = TopText,
-        MinBox = MinBox,
-        MinButton = MinButton,
         CloseButton = CloseButton,
         TabContainer = TabContainer,
         Content1 = ContentContainer1,
@@ -232,16 +181,16 @@ function CustomUI:CreateWindow(config)
         Toggle = function()
             MainFrame.Visible = not MainFrame.Visible
         end,
-        SetKeybind = function(newKey)
-            if type(newKey) == "string" then
-                keyRef.key = newKey
-                print("Keybind updated to: " .. newKey)
+        SetKeybind = function(key)
+            if type(key) == "string" then
+                toggleKey = key
+                print("Keybind set to:", key)
             else
                 warn("SetKeybind expects a string")
             end
         end,
         GetKeybind = function()
-            return keyRef.key
+            return toggleKey
         end
     }
 
@@ -250,7 +199,7 @@ function CustomUI:CreateWindow(config)
 end
 
 -- ============================================
--- CREATE TAB (simplified)
+-- CREATE TAB
 -- ============================================
 function CustomUI:CreateTab(window, config)
     config = config or {}
@@ -359,11 +308,8 @@ function CustomUI:CreateTab(window, config)
 end
 
 -- ============================================
--- CREATE TOGGLE, SLIDER, BUTTON, DROPDOWN, KEYBIND
+-- HELPERS
 -- ============================================
--- (keep the exact same functions as before — they work fine)
--- I'll include them here for completeness, but they are unchanged.
-
 function CustomUI:GetActivePage(tab, side)
     if side == 1 then return tab.Page1 else return tab.Page2 end
 end
@@ -372,6 +318,9 @@ function CustomUI:GetActiveLayout(tab, side)
     if side == 1 then return tab.Layout1 else return tab.Layout2 end
 end
 
+-- ============================================
+-- CREATE SECTION
+-- ============================================
 function CustomUI:CreateSection(tab, config, side)
     side = side or 1
     local name = type(config.Name) == "string" and config.Name or "Section"
@@ -415,6 +364,9 @@ function CustomUI:CreateSection(tab, config, side)
     return section
 end
 
+-- ============================================
+-- CREATE TOGGLE
+-- ============================================
 function CustomUI:CreateToggle(tab, config, side)
     side = side or 1
     local name = type(config.Name) == "string" and config.Name or "Toggle"
@@ -496,6 +448,9 @@ function CustomUI:CreateToggle(tab, config, side)
     return toggle
 end
 
+-- ============================================
+-- CREATE SLIDER
+-- ============================================
 function CustomUI:CreateSlider(tab, config, side)
     side = side or 1
     local name = type(config.Name) == "string" and config.Name or "Slider"
@@ -619,6 +574,9 @@ function CustomUI:CreateSlider(tab, config, side)
     return slider
 end
 
+-- ============================================
+-- CREATE BUTTON
+-- ============================================
 function CustomUI:CreateButton(tab, config, side)
     side = side or 1
     local name = type(config.Name) == "string" and config.Name or "Button"
@@ -657,6 +615,9 @@ function CustomUI:CreateButton(tab, config, side)
     return btn
 end
 
+-- ============================================
+-- CREATE DROPDOWN
+-- ============================================
 function CustomUI:CreateDropdown(tab, config, side)
     side = side or 1
     local name = type(config.Name) == "string" and config.Name or "Dropdown"
@@ -765,6 +726,9 @@ function CustomUI:CreateDropdown(tab, config, side)
     return dropdown
 end
 
+-- ============================================
+-- CREATE KEYBIND
+-- ============================================
 function CustomUI:CreateKeybind(tab, config, side)
     side = side or 1
     local name = type(config.Name) == "string" and config.Name or "Keybind"
@@ -810,19 +774,14 @@ function CustomUI:CreateKeybind(tab, config, side)
     keyBtn.Parent = frame
 
     local function updateKey(key)
-    local keyName = tostring(key):gsub("Enum.KeyCode.", "")
-    if keyName == "Unknown" then keyName = "None" end
-    keybind.Key = keyName
-    keyBtn.Text = keyName
-    keybind.Listening = false
-    -- Call the user callback with the string key
-    if callback and type(callback) == "function" then
-        local success, err = pcall(callback, keyName)
-        if not success then
-            warn("Keybind callback error:", err)
-        end
+        local keyName = tostring(key):gsub("Enum.KeyCode.", "")
+        if keyName == "Unknown" then keyName = "None" end
+        keybind.Key = keyName
+        keyBtn.Text = keyName
+        keybind.Listening = false
+        -- Pass string to callback
+        if callback then callback(keyName) end
     end
-end
 
     keyBtn.MouseButton1Click:Connect(function()
         keybind.Listening = not keybind.Listening
