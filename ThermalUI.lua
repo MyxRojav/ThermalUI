@@ -22,6 +22,17 @@ function CustomUI:CreateWindow(config)
     ThermalUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     ThermalUI.ResetOnSpawn = false
 
+    -- ===== MAIN FRAME (CREATED FIRST) =====
+    local MainFrame = Instance.new("Frame")
+    MainFrame.Name = "MainFrame"
+    MainFrame.Parent = ThermalUI
+    MainFrame.BackgroundColor3 = Color3.fromRGB(17, 17, 17)
+    MainFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+    MainFrame.BorderSizePixel = 0
+    MainFrame.ClipsDescendants = true
+    MainFrame.Position = UDim2.new(0.313900322, -250, 0.380288512, -225)
+    MainFrame.Size = UDim2.new(0, 1075, 0, 583)
+
     -- ===== MINIMIZE BOX (ALWAYS VISIBLE — TOGGLES UI) =====
     local MinBox = Instance.new("TextButton")
     MinBox.Name = "MinBox"
@@ -46,12 +57,10 @@ function CustomUI:CreateWindow(config)
     local minDragging = false
     local minDragStart = nil
     local minDragOffset = nil
-    local minDragInput = nil
 
     local function onMinInputBegan(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             minDragging = true
-            minDragInput = input
             minDragStart = input.Position
             minDragOffset = MinBox.Position
         end
@@ -72,7 +81,6 @@ function CustomUI:CreateWindow(config)
     local function onMinInputEnded(input)
         if minDragging and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
             minDragging = false
-            minDragInput = nil
         end
     end
 
@@ -80,21 +88,10 @@ function CustomUI:CreateWindow(config)
     MinBox.InputChanged:Connect(onMinInputChanged)
     MinBox.InputEnded:Connect(onMinInputEnded)
 
-    -- === CLICK TO TOGGLE UI ===
+    -- === CLICK TO TOGGLE UI (MainFrame exists now) ===
     MinBox.MouseButton1Click:Connect(function()
         MainFrame.Visible = not MainFrame.Visible
     end)
-
-    -- ===== MAIN FRAME =====
-    local MainFrame = Instance.new("Frame")
-    MainFrame.Name = "MainFrame"
-    MainFrame.Parent = ThermalUI
-    MainFrame.BackgroundColor3 = Color3.fromRGB(17, 17, 17)
-    MainFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
-    MainFrame.BorderSizePixel = 0
-    MainFrame.ClipsDescendants = true
-    MainFrame.Position = UDim2.new(0.313900322, -250, 0.380288512, -225)
-    MainFrame.Size = UDim2.new(0, 1075, 0, 583)
 
     -- ===== TOPBAR =====
     local Topbar = Instance.new("Frame")
@@ -250,7 +247,6 @@ function CustomUI:CreateWindow(config)
     -- ===== UI KEYBIND (LIVE REFERENCE) =====
     game:GetService("UserInputService").InputBegan:Connect(function(input, GPE)
         if GPE then return end
-        -- Ensure currentUIKey is a string
         local key = type(currentUIKey) == "string" and currentUIKey or "RightControl"
         if input.KeyCode == Enum.KeyCode[key] and input.UserInputType == Enum.UserInputType.Keyboard then
             MainFrame.Visible = not MainFrame.Visible
