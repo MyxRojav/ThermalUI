@@ -1,5 +1,5 @@
 -- ============================================
--- CUSTOM UI — WORKING VERSION
+-- CUSTOM UI — THERMAL LAYOUT (FULLY FIXED)
 -- ============================================
 
 local CustomUI = {}
@@ -13,13 +13,10 @@ CustomUI.ActiveTab = nil
 function CustomUI:CreateWindow(config)
     config = config or {}
     
-    -- keybind variable (mutable)
-    local toggleKey = "RightControl"
-    
-    -- override with config if provided
-    if type(config.UIKeybind) == "string" then
-        toggleKey = config.UIKeybind
-    end
+    -- KEYBIND AS TABLE (mutable reference)
+    local keybindRef = {
+        key = type(config.UIKeybind) == "string" and config.UIKeybind or "RightControl"
+    }
 
     local ThermalUI = Instance.new("ScreenGui")
     ThermalUI.Name = "ThermalUI"
@@ -241,12 +238,12 @@ function CustomUI:CreateWindow(config)
         end
     end)
 
-    -- ===== THE ACTUAL KEYBIND THAT WORKS =====
+    -- ===== THE KEYBIND THAT ACTUALLY WORKS (uses table reference) =====
     game:GetService("UserInputService").InputBegan:Connect(function(input, GPE)
         if GPE then return end
         if input.UserInputType == Enum.UserInputType.Keyboard then
             local keyName = tostring(input.KeyCode):gsub("Enum.KeyCode.", "")
-            if keyName == toggleKey then
+            if keyName == keybindRef.key then
                 MainFrame.Visible = not MainFrame.Visible
             end
         end
@@ -272,14 +269,14 @@ function CustomUI:CreateWindow(config)
         end,
         SetKeybind = function(key)
             if type(key) == "string" then
-                toggleKey = key
+                keybindRef.key = key
                 print("UI keybind set to:", key)
             else
                 warn("SetKeybind requires a string key name")
             end
         end,
         GetKeybind = function()
-            return toggleKey
+            return keybindRef.key
         end
     }
 
@@ -869,7 +866,7 @@ function CustomUI:CreateKeybind(tab, config, side)
         keybind.Key = keyName
         keyBtn.Text = keyName
         keybind.Listening = false
-        -- Call the UI's SetKeybind method to update the toggle key
+        -- Update the UI toggle keybind
         if callback then callback(keyName) end
     end
 
