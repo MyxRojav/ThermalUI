@@ -52,7 +52,7 @@ local toggle = CustomUI:CreateToggle(Tab, {
 
 ## Slider
 ```lua
-local slider = CustomUI:CreateSlider(tab, {
+local slider = CustomUI:CreateSlider(Tab, {
     Name = "Slider",
     Min = 1,
     Max = 20,
@@ -66,7 +66,7 @@ local slider = CustomUI:CreateSlider(tab, {
 
 ## Button
 ```lua
-CustomUI:CreateButton(tab, {
+CustomUI:CreateButton(Tab, {
     Name = "Button",
     Callback = function()
         print("have you changed the side?????????")
@@ -76,7 +76,7 @@ CustomUI:CreateButton(tab, {
 
 ## Dropdown
 ```lua
-local dropdown = CustomUI:CreateDropdown(tab, {
+local dropdown = CustomUI:CreateDropdown(Tab, {
     Name = "Dropdown",
     Options = {"Option 1", "Option 2", "Option 3"},
     DefaultOption = "Option 1",
