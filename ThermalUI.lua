@@ -14,10 +14,11 @@ function CustomUI:CreateWindow(config)
     config = config or {}
 
     local ThermalUI = Instance.new("ScreenGui")
-    ThermalUI.Name = "ThermalUI"
-    ThermalUI.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
-    ThermalUI.ZIndexBehavior = Enum.ZIndexBehavior.Global
-    ThermalUI.ResetOnSpawn = false
+   ThermalUI.Name = "ThermalUI"
+   ThermalUI.Parent = game:GetService("StarterGui")
+   ThermalUI.DisplayOrder = 999
+   ThermalUI.ZIndexBehavior = Enum.ZIndexBehavior.Global
+   ThermalUI.ResetOnSpawn = false
 
     -- ===== MAIN FRAME =====
     local MainFrame = Instance.new("Frame")
