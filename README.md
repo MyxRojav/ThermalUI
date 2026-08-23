@@ -49,3 +49,41 @@ local toggle = CustomUI:CreateToggle(Tab, {
 }, side) --dont forget to change the side to 1 for left and 2 for right!!!!!!!
 ```
 > im saying it again here change ```side``` to 1 for the left side and 2 for the right side!
+
+## Slider
+```lua
+local slider = CustomUI:CreateSlider(tab, {
+    Name = "Slider",
+    Min = 1,
+    Max = 20,
+    Increment = 1,
+    DefaultValue = 8,
+    Callback = function(value)
+        print(value)
+    end
+}, side)  -- if u come complaining to me cause your shit aint showin' up i will find where you live
+```
+
+## Button
+```lua
+CustomUI:CreateButton(tab, {
+    Name = "Button",
+    Callback = function()
+        print("have you changed the side?????????")
+    end
+}, side)
+```
+
+## Dropdown
+```lua
+local dropdown = CustomUI:CreateDropdown(tab, {
+    Name = "Dropdown",
+    Options = {"Option 1", "Option 2", "Option 3"},
+    DefaultOption = "Option 1",
+    Callback = function(selected)
+        print(selected)
+    end
+}, side) -- T_T change the side
+```
+
+## This is it, if u don't like something the source is open, just grab it and change however you want
