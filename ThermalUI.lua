@@ -2,6 +2,13 @@
 -- ThermalUI
 -- ============================================
 
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+if not LocalPlayer then
+    LocalPlayer = Players:WaitForChild("LocalPlayer")
+end
+task.wait(0.5)
+
 local CustomUI = {}
 CustomUI.Window = nil
 CustomUI.Tabs = {}
@@ -13,7 +20,7 @@ CustomUI.ActiveTab = nil
 function CustomUI:CreateWindow(config)
     config = config or {}
 
-    local ThermalUI = Instance.new("ScreenGui")
+local ThermalUI = Instance.new("ScreenGui")
    ThermalUI.Name = "ThermalUI"
    ThermalUI.Parent = game:GetService("StarterGui")
    ThermalUI.DisplayOrder = 999
