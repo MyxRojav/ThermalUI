@@ -10,7 +10,29 @@ as i said this is a work in development and a barebones UI, any update can break
 ![Thermal](https://raw.githubusercontent.com/MyxRojav/ThermalUI/refs/heads/main/Thermal%20UI%20banner.png)
 
 
-## Botting the Window
+## Botting the library
 ```lua
 local CustomUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/MyxRojav/ThermalUI/refs/heads/main/ThermalUI.lua"))()
+```
+## Creating the Window
+```lua
+local window = CustomUI:CreateWindow({
+    LogoID = "rbxassetid://YOUR_IMAGE_ID",  -- optional, but the big ass image is kinda the whole point of the UI lmao
+    TopText = "Welcome to Thermal UI!"      -- optional, just adds a text shit in top left
+})
+```
+> btw ```RightCtrl``` to toggle is hard-coded rn cause i had issues with custom keybind for some obscure reason, anyways you have that and a toggle box for the mobile users
+
+## Making the Tabs
+```lua
+local Tab = CustomUI:CreateTab(window, {
+    Name = "Tab 1"
+})
+```
+
+### Creating a section
+```lua
+CustomUI:CreateSection(Tab, {
+    Name = "Section"
+}, side) -- 'side' refers to the 2 sides the script has to put toggles, 1 is for the left side and 2 is for the right side
 ```
