@@ -7,3 +7,4 @@ Thermal UI is a barebones UI made for me to use in Bamboozle.hax Scripts (found 
 as i said this is a work in development and a barebones UI, any update can break it so do as you please
 
 # Thermal UI by RojavTryhard
+![Thermal](link)
