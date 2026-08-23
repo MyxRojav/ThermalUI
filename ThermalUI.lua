@@ -2,13 +2,6 @@
 -- ThermalUI
 -- ============================================
 
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-if not LocalPlayer then
-    LocalPlayer = Players:WaitForChild("LocalPlayer")
-end
-task.wait(0.5)
-
 local CustomUI = {}
 CustomUI.Window = nil
 CustomUI.Tabs = {}
