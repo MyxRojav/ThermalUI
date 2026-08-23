@@ -36,3 +36,16 @@ CustomUI:CreateSection(Tab, {
     Name = "Section"
 }, side) -- 'side' refers to the 2 sides the script has to put toggles, 1 is for the left side and 2 is for the right side
 ```
+> change ```side``` to 1 or 2 depending on what side you want the section to be on!!! 1 for left and 2 for right!!!!
+
+## Creating a Toggle
+```lua
+local toggle = CustomUI:CreateToggle(Tab, {
+    Name = "Toggle",
+    DefaultValue = false,
+    Callback = function(value)
+        print(value)
+    end
+}, side) --dont forget to change the side to 1 for left and 2 for right!!!!!!!
+```
+> im saying it again here change ```side``` to 1 for the left side and 2 for the right side!
