@@ -13,13 +13,11 @@ CustomUI.ActiveTab = nil
 function CustomUI:CreateWindow(config)
     config = config or {}
 
-   local ThermalUI = Instance.new("ScreenGui")
-   ThermalUI.Name = "ThermalUI"
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer or Players:WaitForChild("LocalPlayer")
-   ThermalUI.Parent = LocalPlayer:WaitForChild("PlayerGui")
-   ThermalUI.ZIndexBehavior = Enum.ZIndexBehavior.Global
-   ThermalUI.ResetOnSpawn = false
+    local ThermalUI = Instance.new("ScreenGui")
+    ThermalUI.Name = "ThermalUI"
+    ThermalUI.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+    ThermalUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    ThermalUI.ResetOnSpawn = false
 
     -- ===== MAIN FRAME =====
     local MainFrame = Instance.new("Frame")
