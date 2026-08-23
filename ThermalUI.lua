@@ -17,7 +17,7 @@ local ThermalUI = Instance.new("ScreenGui")
    ThermalUI.Name = "ThermalUI"
    ThermalUI.Parent = game:GetService("PlayerGui")
    ThermalUI.DisplayOrder = 999
-   ThermalUI.ZIndexBehavior = Enum.ZIndexBehavior.Global
+   ThermalUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
    ThermalUI.ResetOnSpawn = false
 
     -- ===== MAIN FRAME =====
