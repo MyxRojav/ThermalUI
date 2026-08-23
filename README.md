@@ -8,3 +8,9 @@ as i said this is a work in development and a barebones UI, any update can break
 
 # Thermal UI by RojavTryhard
 ![Thermal](https://raw.githubusercontent.com/MyxRojav/ThermalUI/refs/heads/main/Thermal%20UI%20banner.png)
+
+
+## Botting the Window
+```lua
+local CustomUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/MyxRojav/ThermalUI/refs/heads/main/ThermalUI.lua"))()
+```
