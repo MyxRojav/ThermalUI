@@ -88,13 +88,13 @@ local dropdown = CustomUI:CreateDropdown(Tab, {
 
 ## Custom Input
 ```lua
-CustomUI:CreateKeybind(settingsTab, {
+CustomUI:CreateKeybind(Tab, {
     Name = "UI Toggle Keybind",
     DefaultKey = "RightControl",
     Callback = function(key)
         print(key)
     end
-}, 1)
+}, side)
 ```
 
 ## This is it, if u don't like something the source is open, just grab it and change however you want
