@@ -2,7 +2,6 @@ local CustomUI = {}
 CustomUI.Window = nil
 CustomUI.Tabs = {}
 CustomUI.ActiveTab = nil
-toggleUI = "RightCtrl"
 
 -- CREATE WINDOW
 function CustomUI:CreateWindow(config)
@@ -210,7 +209,7 @@ function CustomUI:CreateWindow(config)
         if GPE then return end
         if input.UserInputType == Enum.UserInputType.Keyboard then
             local pressedKey = tostring(input.KeyCode):gsub("Enum.KeyCode.", "")
-            if pressedKey == toggleUI then
+            if pressedKey == "RightCtrl" then
                 MainFrame.Visible = not MainFrame.Visible
             end
         end
