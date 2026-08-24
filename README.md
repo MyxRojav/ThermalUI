@@ -86,4 +86,17 @@ local dropdown = CustomUI:CreateDropdown(Tab, {
 }, side) -- T_T change the side
 ```
 
+## Custom Input
+```lua
+CustomUI:CreateKeybind(settingsTab, {
+    Name = "UI Toggle Keybind",
+    DefaultKey = "RightControl",
+    Callback = function(key)
+        -- Update the UI toggle key
+        CustomUI.pressedKey = key
+        print("UI keybind set to:", key)
+    end
+}, 1)
+```
+
 ## This is it, if u don't like something the source is open, just grab it and change however you want
