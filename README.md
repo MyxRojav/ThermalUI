@@ -92,9 +92,7 @@ CustomUI:CreateKeybind(settingsTab, {
     Name = "UI Toggle Keybind",
     DefaultKey = "RightControl",
     Callback = function(key)
-        -- Update the UI toggle key
-        CustomUI.pressedKey = key
-        print("UI keybind set to:", key)
+        print(key)
     end
 }, 1)
 ```
