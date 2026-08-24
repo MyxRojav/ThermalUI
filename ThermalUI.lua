@@ -18,6 +18,7 @@ function CustomUI:CreateWindow(config)
     ThermalUI.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
     ThermalUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     ThermalUI.ResetOnSpawn = false
+    ThermalUI.DisplayOrder = 200
 
     -- ===== MAIN FRAME =====
     local MainFrame = Instance.new("Frame")
