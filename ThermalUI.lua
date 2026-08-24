@@ -2,7 +2,7 @@ local CustomUI = {}
 CustomUI.Window = nil
 CustomUI.Tabs = {}
 CustomUI.ActiveTab = nil
-toggleUI = "RightCtrl"
+local toggleUI = "RightCtrl"
 
 -- CREATE WINDOW
 function CustomUI:CreateWindow(config)
