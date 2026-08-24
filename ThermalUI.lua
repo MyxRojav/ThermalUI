@@ -1,15 +1,9 @@
--- ============================================
--- ThermalUI
--- ============================================
-
 local CustomUI = {}
 CustomUI.Window = nil
 CustomUI.Tabs = {}
 CustomUI.ActiveTab = nil
 
--- ============================================
 -- CREATE WINDOW
--- ============================================
 function CustomUI:CreateWindow(config)
     config = config or {}
 
@@ -20,7 +14,7 @@ function CustomUI:CreateWindow(config)
     ThermalUI.ResetOnSpawn = false
     ThermalUI.DisplayOrder = 200
 
-    -- ===== MAIN FRAME =====
+    -- MAIN FRAME
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainFrame"
     MainFrame.Parent = ThermalUI
@@ -31,7 +25,7 @@ function CustomUI:CreateWindow(config)
     MainFrame.Position = UDim2.new(0.313900322, -250, 0.380288512, -225)
     MainFrame.Size = UDim2.new(0, 1075, 0, 583)
 
-    -- ===== MINIMIZE BOX (toggles UI) =====
+    -- MINIMIZE BOX
     local MinBox = Instance.new("TextButton")
     MinBox.Name = "MinBox"
     MinBox.Parent = ThermalUI
@@ -86,7 +80,7 @@ function CustomUI:CreateWindow(config)
         end
     end)
 
-    -- ===== TOPBAR =====
+    -- TOPBAR
     local Topbar = Instance.new("Frame")
     Topbar.Name = "Topbar"
     Topbar.Parent = MainFrame
@@ -107,7 +101,7 @@ function CustomUI:CreateWindow(config)
     TopText.TextXAlignment = Enum.TextXAlignment.Left
     TopText.Font = Enum.Font.GothamMedium
 
-    -- ===== CLOSE BUTTON =====
+    -- CLOSE BUTTON
     local CloseButton = Instance.new("TextButton")
     CloseButton.Name = "CloseButton"
     CloseButton.Parent = Topbar
@@ -129,7 +123,7 @@ function CustomUI:CreateWindow(config)
         ThermalUI:Destroy()
     end)
 
-    -- ===== DRAGGING (Topbar) =====
+    -- DRAGGING (Topbar)
     local dragging = false
     local dragStart = nil
     local dragOffset = nil
@@ -160,7 +154,7 @@ function CustomUI:CreateWindow(config)
         end
     end)
 
-    -- ===== LOGO =====
+    -- LOGO
     local LogoContainer = Instance.new("Frame")
     LogoContainer.Name = "LogoContainer"
     LogoContainer.Parent = MainFrame
@@ -181,7 +175,7 @@ function CustomUI:CreateWindow(config)
     Logo.Image = type(config.LogoID) == "string" and config.LogoID or "rbxassetid://137394765830675"
     Logo.ScaleType = Enum.ScaleType.Fit
 
-    -- ===== TAB CONTAINER =====
+    -- TAB CONTAINER
     local TabContainer = Instance.new("Frame")
     TabContainer.Name = "TabContainer"
     TabContainer.Parent = MainFrame
@@ -191,7 +185,7 @@ function CustomUI:CreateWindow(config)
     TabContainer.Size = UDim2.new(0, 467, 0, 293)
     TabContainer.ClipsDescendants = true
 
-    -- ===== CONTENT CONTAINERS =====
+    -- CONTENT CONTAINERS
     local ContentContainer1 = Instance.new("Frame")
     ContentContainer1.Name = "ContentContainer1"
     ContentContainer1.Parent = MainFrame
@@ -210,7 +204,7 @@ function CustomUI:CreateWindow(config)
     ContentContainer2.Size = UDim2.new(0, 294, 0, 545)
     ContentContainer2.ClipsDescendants = true
 
-    -- ===== HARDCODED KEYBIND (RightControl ONLY) =====
+    -- KEYBIND
     game:GetService("UserInputService").InputBegan:Connect(function(input, GPE)
         if GPE then return end
         if input.UserInputType == Enum.UserInputType.Keyboard then
@@ -221,7 +215,7 @@ function CustomUI:CreateWindow(config)
         end
     end)
 
-    -- ===== WINDOW OBJECT =====
+    -- WINDOW OBJECT
     local window = {
         ThermalUI = ThermalUI,
         MainFrame = MainFrame,
@@ -244,9 +238,7 @@ function CustomUI:CreateWindow(config)
     return window
 end
 
--- ============================================
 -- CREATE TAB
--- ============================================
 function CustomUI:CreateTab(window, config)
     config = config or {}
     local tabName = type(config.Name) == "string" and config.Name or "Tab"
@@ -353,9 +345,7 @@ function CustomUI:CreateTab(window, config)
     return tab
 end
 
--- ============================================
--- HELPERS
--- ============================================
+--
 function CustomUI:GetActivePage(tab, side)
     if side == 1 then return tab.Page1 else return tab.Page2 end
 end
@@ -364,9 +354,7 @@ function CustomUI:GetActiveLayout(tab, side)
     if side == 1 then return tab.Layout1 else return tab.Layout2 end
 end
 
--- ============================================
 -- CREATE SECTION
--- ============================================
 function CustomUI:CreateSection(tab, config, side)
     side = side or 1
     local name = type(config.Name) == "string" and config.Name or "Section"
@@ -410,9 +398,7 @@ function CustomUI:CreateSection(tab, config, side)
     return section
 end
 
--- ============================================
 -- CREATE TOGGLE
--- ============================================
 function CustomUI:CreateToggle(tab, config, side)
     side = side or 1
     local name = type(config.Name) == "string" and config.Name or "Toggle"
@@ -494,9 +480,88 @@ function CustomUI:CreateToggle(tab, config, side)
     return toggle
 end
 
--- ============================================
+-- CREATE KEYBIND
+function CustomUI:CreateKeybind(tab, config, side)
+    side = side or 1
+    local name = type(config.Name) == "string" and config.Name or "Keybind"
+    local defaultKey = type(config.DefaultKey) == "string" and config.DefaultKey or "None"
+    local callback = type(config.Callback) == "function" and config.Callback or function() end
+
+    local page = self:GetActivePage(tab, side)
+    local layout = self:GetActiveLayout(tab, side)
+
+    local keybind = {}
+    keybind.Name = name
+    keybind.Key = defaultKey
+    keybind.Listening = false
+
+    local frame = Instance.new("Frame")
+    frame.Name = name .. "Keybind"
+    frame.Size = UDim2.new(1, -20, 0, 30)
+    frame.BackgroundTransparency = 1
+    frame.Parent = page
+
+    local label = Instance.new("TextLabel")
+    label.Name = "Label"
+    label.Size = UDim2.new(0.5, 0, 1, 0)
+    label.Position = UDim2.new(0, 10, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Text = name
+    label.TextColor3 = Color3.fromRGB(200, 200, 200)
+    label.TextSize = 13
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Font = Enum.Font.GothamMedium
+    label.Parent = frame
+
+    local keyBtn = Instance.new("TextButton")
+    keyBtn.Name = "KeyBtn"
+    keyBtn.Size = UDim2.new(0.3, 0, 1, 0)
+    keyBtn.Position = UDim2.new(0.7, 0, 0, 0)
+    keyBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+    keyBtn.BorderSizePixel = 0
+    keyBtn.Text = defaultKey
+    keyBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+    keyBtn.TextSize = 13
+    keyBtn.Font = Enum.Font.GothamMedium
+    keyBtn.Parent = frame
+
+    local function updateKey(key)
+        local keyName = tostring(key):gsub("Enum.KeyCode.", "")
+        if keyName == "Unknown" then keyName = "None" end
+        keybind.Key = keyName
+        keyBtn.Text = keyName
+        keybind.Listening = false
+        if callback then callback(keyName) end
+    end
+
+    keyBtn.MouseButton1Click:Connect(function()
+        keybind.Listening = not keybind.Listening
+        if keybind.Listening then
+            keyBtn.Text = "..."
+            keyBtn.BackgroundColor3 = Color3.fromRGB(70, 130, 255)
+            local con
+            con = game:GetService("UserInputService").InputBegan:Connect(function(input, GPE)
+                if GPE then return end
+                if input.UserInputType == Enum.UserInputType.Keyboard then
+                    con:Disconnect()
+                    updateKey(input.KeyCode)
+                    keyBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+                end
+            end)
+        else
+            keyBtn.Text = keybind.Key
+            keyBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+        end
+    end)
+
+    keybind.Frame = frame
+    keybind.Update = updateKey
+    tab.Elements[#tab.Elements + 1] = keybind
+
+    return keybind
+end
+
 -- CREATE SLIDER
--- ============================================
 function CustomUI:CreateSlider(tab, config, side)
     side = side or 1
     local name = type(config.Name) == "string" and config.Name or "Slider"
@@ -620,9 +685,7 @@ function CustomUI:CreateSlider(tab, config, side)
     return slider
 end
 
--- ============================================
 -- CREATE BUTTON
--- ============================================
 function CustomUI:CreateButton(tab, config, side)
     side = side or 1
     local name = type(config.Name) == "string" and config.Name or "Button"
@@ -661,9 +724,7 @@ function CustomUI:CreateButton(tab, config, side)
     return btn
 end
 
--- ============================================
 -- CREATE DROPDOWN
--- ============================================
 function CustomUI:CreateDropdown(tab, config, side)
     side = side or 1
     local name = type(config.Name) == "string" and config.Name or "Dropdown"
@@ -774,7 +835,5 @@ function CustomUI:CreateDropdown(tab, config, side)
     return dropdown
 end
 
--- ============================================
--- RETURN
--- ============================================
+---------------
 return CustomUI
