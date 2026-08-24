@@ -719,6 +719,7 @@ function CustomUI:CreateDropdown(tab, config, side)
     dropdownFrame.BorderColor3 = Color3.fromRGB(50, 50, 55)
     dropdownFrame.ClipsDescendants = true
     dropdownFrame.Visible = false
+    dropdownFrame.ZIndex = 999
     dropdownFrame.Parent = frame
 
     local listLayout = Instance.new("UIListLayout")
@@ -743,6 +744,7 @@ function CustomUI:CreateDropdown(tab, config, side)
         optBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
         optBtn.TextSize = 13
         optBtn.Font = Enum.Font.GothamMedium
+        optBtn.ZIndex = 999
         optBtn.Parent = dropdownFrame
 
         optBtn.MouseButton1Click:Connect(function()
